@@ -1,6 +1,6 @@
 import { NestFactory, Reflector } from "@nestjs/core";
 import { AppModule } from "./app.module";
-import { ResponseInterceptor } from "interceptors/response.interceptor";
+import { ResponseInterceptor } from "src/interceptors/response.interceptor";
 import { ValidationPipe } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 
