@@ -5,12 +5,15 @@ import {
 	NestInterceptor,
 } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
+import { I18nService } from "nestjs-i18n";
 import { map, Observable } from "rxjs";
 
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor<T, any> {
-	// Se inyecta el reflector para poder leer la metadata
-	constructor(private reflector: Reflector) {}
+	constructor(
+		private reflector: Reflector, // Se inyecta el reflector para poder leer la metadata
+		private readonly i18n: I18nService,
+	) {}
 
 	intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
 		const response = context.switchToHttp().getResponse();
@@ -22,12 +25,18 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, any> {
 		);
 
 		return next.handle().pipe(
-			// En caso de éxito
-			map((data) => ({
-				message: successMessage,
-				statusCode: response.statusCode, // Se obtiene el código de estado de la solicitud
-				data: data ? data : null,
-			})),
+			map((data) => {
+				// Traducir si hay mensaje
+				const message = successMessage
+					? this.i18n.translate(successMessage, { lang: "es" })
+					: null;
+
+				return {
+					message,
+					statusCode: response.statusCode,
+					data: data ?? null,
+				};
+			}),
 		);
 	}
 }

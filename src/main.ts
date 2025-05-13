@@ -3,11 +3,15 @@ import { AppModule } from "./app.module";
 import { ResponseInterceptor } from "src/interceptors/response.interceptor";
 import { ValidationPipe } from "@nestjs/common";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { I18nService } from "nestjs-i18n";
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
+
 	app.useGlobalPipes(new ValidationPipe()); // Aplica validaciones a las peticiones entrantes para validar datos a nivel global
-	app.useGlobalInterceptors(new ResponseInterceptor(app.get(Reflector))); // Se inyecta el reflector en el interceptor
+	const reflector = app.get(Reflector);
+	const i18n = app.get<I18nService<Record<string, unknown>>>(I18nService);
+	app.useGlobalInterceptors(new ResponseInterceptor(reflector, i18n)); // Se inyecta el reflector en el interceptor
 
 	// Configuración de Swagger
 	const config = new DocumentBuilder()
