@@ -4,6 +4,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import config from "config/env-config";
 import { AcceptLanguageResolver, I18nModule } from "nestjs-i18n";
 import * as path from "path";
+import { AuthModule } from "./modules/auth/auth.module";
 import { UsersModule } from "./modules/users/users.module";
 
 @Module({
@@ -41,6 +42,7 @@ import { UsersModule } from "./modules/users/users.module";
 			},
 		}),
 		UsersModule,
+		AuthModule,
 	],
 })
 export class AppModule {}
