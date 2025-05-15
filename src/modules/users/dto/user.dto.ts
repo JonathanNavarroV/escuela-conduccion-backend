@@ -48,7 +48,7 @@ export class CreateUserDto {
 	@MinLength(6)
 	@ApiProperty({
 		description: "Contraseña del usuario (Mínimo 6 caracteres)",
-		example: "juan.perez@ejemplo.com",
+		example: "contraseña.segura.123",
 	})
 	password: string;
 
