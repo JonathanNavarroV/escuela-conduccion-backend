@@ -6,6 +6,7 @@ import { AcceptLanguageResolver, I18nModule } from "nestjs-i18n";
 import * as path from "path";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
+import { UsersModule } from "./modules/users/users.module";
 
 @Module({
 	imports: [
@@ -41,6 +42,7 @@ import { AppService } from "./app.service";
 				trustServerCertificate: true, // Desactiva la validación del certificado para conexiones de SQL Server
 			},
 		}),
+		UsersModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],
