@@ -20,6 +20,7 @@ async function bootstrap() {
 			"API general para la gestión de recursos y operaciones de la plataforma",
 		)
 		.setVersion("0.1")
+		.addBearerAuth()
 		.build();
 
 	// Generar el documento basado en la configuración anterior
