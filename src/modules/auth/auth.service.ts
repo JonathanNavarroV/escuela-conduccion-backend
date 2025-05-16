@@ -1,5 +1,6 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
+import * as bcrypt from "bcrypt";
 import { I18nService } from "nestjs-i18n";
 import { UsersService } from "../users/users.service";
 
@@ -13,18 +14,26 @@ export class AuthService {
 
 	/**
 	 * Autentica a un usuario y retorna un token JWT si las credenciales son válidas.
+	 * Compara la contraseña ingresada con el hash almacenado usando bcrypt.
 	 *
 	 * @param email - Correo electrónico del usuario.
-	 * @param password - Contraseña del usuario.
-	 * @returns Un objeto con el token de acceso generado.
-	 * @throws {UnauthorizedException} Si las credenciales son inválidas.
+	 * @param password - Contraseña del usuario en texto plano.
+	 * @returns Un objeto con el token de acceso JWT generado.
+	 * @throws {UnauthorizedException} Si las credenciales son inválidas. Por razones de seguridad, no se especifica si el error es por correo inexistente o la contraseña incorrecta.
 	 */
 	async signIn(
 		email: string,
 		password: string,
 	): Promise<{ access_token: string }> {
 		const user = await this.userService.findOneByEmail(email);
-		if (user?.password !== password) {
+		if (!user) {
+			throw new UnauthorizedException(
+				this.i18n.translate("auth.invalid_credentials"),
+			);
+		}
+
+		const isMatch = await bcrypt.compare(password, user.password);
+		if (!isMatch) {
 			throw new UnauthorizedException(
 				this.i18n.translate("auth.invalid_credentials"),
 			);
