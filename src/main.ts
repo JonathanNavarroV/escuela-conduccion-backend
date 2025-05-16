@@ -8,6 +8,12 @@ import { I18nService } from "nestjs-i18n";
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
 
+	app.enableCors({
+		origin: process.env.FRONTEND_URL,
+		methods: "GET,PATCH,POST,DELETE",
+		credentials: true, // Permite el envío de credenciales mediante la cabecera
+	});
+
 	app.useGlobalPipes(new ValidationPipe()); // Aplica validaciones a las peticiones entrantes para validar datos a nivel global
 	const reflector = app.get(Reflector);
 	const i18n = app.get<I18nService<Record<string, unknown>>>(I18nService);
