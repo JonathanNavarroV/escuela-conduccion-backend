@@ -22,7 +22,7 @@ export class UsersService {
 	 *
 	 * @param createUserDto - Datos necesarios para crear el usuario.
 	 * @returns Una promesa con el usuario creado.
-	 * @throws ConflictException si el email ya está registrado.
+	 * @throws {ConflictException} Si el email ya está registrado.
 	 */
 	async create(createUserDto: CreateUserDto): Promise<User> {
 		const userFound = await this.findOneByEmail(createUserDto.email);
@@ -48,7 +48,7 @@ export class UsersService {
 	 *
 	 * @param id - ID del usuario (UUID).
 	 * @returns Una promesa que resuelve con el usuario si se encuentra.
-	 * @throws NotFoundException si no se encuentra un usuario con el ID proporcionado.
+	 * @throws {NotFoundException} Si no se encuentra un usuario con el ID proporcionado.
 	 */
 	async findOneById(id: string): Promise<User> {
 		const userFound = await this.userRepository.findOne({
@@ -84,8 +84,8 @@ export class UsersService {
 	 * @param id - ID del usuario a actualizar.
 	 * @param updateUserDTO - Datos a actualizar.
 	 * @returns Una promesa con el resultado de la operación.
-	 * @throws NotFoundException si no se encuentra el usuario.
-	 * @throws ConflictException si el nuevo email ya está en uso por otro usuario.
+	 * @throws {NotFoundException} Si no se encuentra el usuario.
+	 * @throws {ConflictException} Si el nuevo email ya está en uso por otro usuario.
 	 */
 	async update(
 		id: string,
@@ -122,7 +122,7 @@ export class UsersService {
 	 *
 	 * @param id - ID del usuario a eliminar.
 	 * @returns Una promesa con el resultado de la eliminación
-	 * @throws NotFoundException si el usuario no existe.
+	 * @throws {NotFoundException} Si el usuario no existe.
 	 */
 	async remove(id: string): Promise<DeleteResult> {
 		const userFound = await this.userRepository.findOne({
