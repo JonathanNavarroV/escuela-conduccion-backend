@@ -1,10 +1,12 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
+import { I18nService } from "nestjs-i18n";
 import { UsersService } from "../users/users.service";
 
 @Injectable()
 export class AuthService {
 	constructor(
+		private readonly i18n: I18nService,
 		private userService: UsersService,
 		private jwtService: JwtService,
 	) {}
@@ -15,7 +17,7 @@ export class AuthService {
 	 * @param email - Correo electrónico del usuario.
 	 * @param password - Contraseña del usuario.
 	 * @returns Un objeto con el token de acceso generado.
-	 * @throws UnauthorizedException si las credenciales son inválidas.
+	 * @throws {UnauthorizedException} Si las credenciales son inválidas.
 	 */
 	async signIn(
 		email: string,
@@ -23,7 +25,9 @@ export class AuthService {
 	): Promise<{ access_token: string }> {
 		const user = await this.userService.findOneByEmail(email);
 		if (user?.password !== password) {
-			throw new UnauthorizedException("auth.invalid_credentials");
+			throw new UnauthorizedException(
+				this.i18n.translate("auth.invalid_credentials"),
+			);
 		}
 
 		// Se crea un payload con el ID e email del usuario autenticado para generar el token
