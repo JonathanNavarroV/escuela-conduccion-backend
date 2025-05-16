@@ -18,7 +18,7 @@ import { User } from "./entities/user.entity";
 import { UsersService } from "./users.service";
 
 @Controller("users")
-@UseGuards(AuthGuard)
+// @UseGuards(AuthGuard)
 @ApiBearerAuth()
 export class UsersController {
 	constructor(private readonly userService: UsersService) {}
