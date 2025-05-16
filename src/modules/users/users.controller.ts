@@ -7,15 +7,19 @@ import {
 	ParseUUIDPipe,
 	Patch,
 	Post,
+	UseGuards,
 } from "@nestjs/common";
-import { ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { SuccessMessage } from "src/common/decorators/success-messages.decorator";
 import { DeleteResult, UpdateResult } from "typeorm";
+import { AuthGuard } from "../auth/auth.guard";
 import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
 import { User } from "./entities/user.entity";
 import { UsersService } from "./users.service";
 
 @Controller("users")
+@UseGuards(AuthGuard)
+@ApiBearerAuth()
 export class UsersController {
 	constructor(private readonly userService: UsersService) {}
 
