@@ -7,7 +7,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import * as bcrypt from "bcrypt";
 import { plainToInstance } from "class-transformer";
 import { I18nService } from "nestjs-i18n";
-import { DeleteResult, Repository, UpdateResult } from "typeorm";
+import { DeleteResult, ILike, Repository, UpdateResult } from "typeorm";
 import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
 import { User } from "./entities/user.entity";
 
@@ -56,6 +56,26 @@ export class UsersService {
 		const users = await this.userRepository.find();
 
 		return plainToInstance(User, users);
+	}
+
+	/**
+	 * Busca usuarios cuyo nombre completo (nombre + apellidos) contiene el término de búsqueda,
+	 * ignorando mayúsculas, minúsculas y tildes.
+	 *
+	 * @param searchTerm - Texto parcial para buscar en el nombre completo.
+	 * @returns Una promesa que resuelve con un arreglo de usuarios que coinciden.
+	 * @throws {NotFoundException} Si no se encuentra ningún usuario que coincida con el término.
+	 */
+	async searchByFullName(searchTerm: string): Promise<User[]> {
+		const usersFound = await this.userRepository
+			.createQueryBuilder("user")
+			.where(
+				`CONCAT(user.firstName, ' ', user.lastNameFather, ' ', user.lastNameMother) COLLATE Latin1_General_CI_AI LIKE :searchTerm`,
+				{ searchTerm: `%${searchTerm}%` },
+			)
+			.getMany();
+
+		return plainToInstance(User, usersFound);
 	}
 
 	/**

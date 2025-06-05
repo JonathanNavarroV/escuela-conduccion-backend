@@ -7,12 +7,11 @@ import {
 	ParseUUIDPipe,
 	Patch,
 	Post,
-	UseGuards,
+	Query,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { SuccessMessage } from "src/common/decorators/success-messages.decorator";
 import { DeleteResult, UpdateResult } from "typeorm";
-import { AuthGuard } from "../auth/auth.guard";
 import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
 import { User } from "./entities/user.entity";
 import { UsersService } from "./users.service";
@@ -58,6 +57,26 @@ export class UsersController {
 	@SuccessMessage("common.success")
 	findAll(): Promise<User[]> {
 		return this.userService.findAll();
+	}
+
+	@Get("search")
+	@ApiOperation({
+		summary: "Buscar usuarios por coincidencia de nombre",
+		description:
+			"Devuelve una lista de usuarios cuyo nombre y/o apellido coincida parcialmente con el valor proporcionado.",
+	})
+	@ApiResponse({
+		status: 200,
+		description: "Usuarios encontrados que coinciden con la búsqueda.",
+		type: [User],
+	})
+	@ApiResponse({
+		status: 404,
+		description: "No se encontraron usuarios que coincidan con la búsqueda.",
+	})
+	@SuccessMessage("common.success")
+	searchByFullName(@Query("fullName") searchTerm: string): Promise<User[]> {
+		return this.userService.searchByFullName(searchTerm);
 	}
 
 	@Get(":id")
