@@ -10,7 +10,7 @@ import {
 	Query,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiResponse } from "@nestjs/swagger";
-import { SuccessMessage } from "src/common/decorators/success-messages.decorator";
+import { SuccessMessageKey } from "src/common/decorators/success-message.decorator";
 import { DeleteResult, UpdateResult } from "typeorm";
 import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
 import { User } from "./entities/user.entity";
@@ -37,7 +37,7 @@ export class UsersController {
 		status: 409,
 		description: "Ya existe un usuario con ese correo electrónico.",
 	})
-	@SuccessMessage("users.created")
+	@SuccessMessageKey("user.created")
 	create(@Body() createUserDto: CreateUserDto): Promise<User> {
 		return this.userService.create(createUserDto);
 	}
@@ -54,7 +54,7 @@ export class UsersController {
 		type: User,
 		isArray: true,
 	})
-	@SuccessMessage("common.success")
+	@SuccessMessageKey("common.success")
 	findAll(): Promise<User[]> {
 		return this.userService.findAll();
 	}
@@ -74,7 +74,7 @@ export class UsersController {
 		status: 404,
 		description: "No se encontraron usuarios que coincidan con la búsqueda.",
 	})
-	@SuccessMessage("common.success")
+	@SuccessMessageKey("common.success")
 	searchByFullName(@Query("fullName") searchTerm: string): Promise<User[]> {
 		return this.userService.searchByFullName(searchTerm);
 	}
@@ -93,7 +93,7 @@ export class UsersController {
 		status: 404,
 		description: "No se encontró un usuario con el ID proporcionado.",
 	})
-	@SuccessMessage("common.success")
+	@SuccessMessageKey("common.success")
 	findOneById(@Param("id", ParseUUIDPipe) id: string): Promise<User> {
 		return this.userService.findOneById(id);
 	}
@@ -116,7 +116,7 @@ export class UsersController {
 		status: 409,
 		description: "Ya existe un usuario con ese correo electrónico.",
 	})
-	@SuccessMessage("users.updated")
+	@SuccessMessageKey("user.updated")
 	update(
 		@Param("id", ParseUUIDPipe) id: string,
 		@Body() updateUserDto: UpdateUserDto,
@@ -137,7 +137,7 @@ export class UsersController {
 		status: 404,
 		description: "Usuario no encontrado.",
 	})
-	@SuccessMessage("users.deleted")
+	@SuccessMessageKey("user.deleted")
 	remove(@Param("id", ParseUUIDPipe) id: string): Promise<DeleteResult> {
 		return this.userService.remove(id);
 	}

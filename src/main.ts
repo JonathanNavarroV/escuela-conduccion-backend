@@ -1,9 +1,8 @@
-import { NestFactory, Reflector } from "@nestjs/core";
-import { AppModule } from "./app.module";
-import { ResponseInterceptor } from "src/interceptors/response.interceptor";
 import { ValidationPipe } from "@nestjs/common";
+import { NestFactory, Reflector } from "@nestjs/core";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { I18nService } from "nestjs-i18n";
+import { ResponseInterceptor } from "src/interceptors/response.interceptor";
+import { AppModule } from "./app.module";
 
 async function bootstrap() {
 	const app = await NestFactory.create(AppModule);
@@ -16,8 +15,7 @@ async function bootstrap() {
 
 	app.useGlobalPipes(new ValidationPipe()); // Aplica validaciones a las peticiones entrantes para validar datos a nivel global
 	const reflector = app.get(Reflector);
-	const i18n = app.get<I18nService<Record<string, unknown>>>(I18nService);
-	app.useGlobalInterceptors(new ResponseInterceptor(reflector, i18n)); // Se inyecta el reflector en el interceptor
+	app.useGlobalInterceptors(new ResponseInterceptor(reflector)); // Se inyecta el reflector en el interceptor
 
 	// Configuración de Swagger
 	const config = new DocumentBuilder()
