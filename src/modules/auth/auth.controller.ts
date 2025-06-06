@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from "@nestjs/common";
 import { ApiOperation, ApiResponse } from "@nestjs/swagger";
-import { SuccessMessage } from "src/common/decorators/success-messages.decorator";
+import { SuccessMessageKey } from "src/common/decorators/success-message.decorator";
 import { AuthService } from "./auth.service";
 import { SignInDto } from "./dto/signIn.dto";
 
@@ -28,7 +28,7 @@ export class AuthController {
 		description: "Credenciales inválidas.",
 	})
 	@HttpCode(HttpStatus.OK) // Si la solicitud es exitosa, se devuelve un status 200
-	@SuccessMessage("auth.successful_login")
+	@SuccessMessageKey("auth.successful_login")
 	signIn(@Body() signInDto: SignInDto): Promise<{ access_token: string }> {
 		return this.authService.signIn(signInDto.email, signInDto.password);
 	}

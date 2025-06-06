@@ -7,12 +7,10 @@ import {
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { Request } from "express";
-import { I18nService } from "nestjs-i18n";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
 	constructor(
-		private readonly i18n: I18nService,
 		private jwtService: JwtService,
 		private configService: ConfigService,
 	) {}
@@ -33,7 +31,7 @@ export class AuthGuard implements CanActivate {
 		// Se extrae el token de la cabecera de autorización
 		const token = this.extractTokenFromHeader(request);
 		if (!token) {
-			throw new UnauthorizedException(this.i18n.translate("auth.unauthorized"));
+			throw new UnauthorizedException({ messageKey: "auth.unauthorized" });
 		}
 
 		try {
@@ -42,7 +40,7 @@ export class AuthGuard implements CanActivate {
 			});
 			request["user"] = payload;
 		} catch {
-			throw new UnauthorizedException(this.i18n.translate("auth.unauthorized"));
+			throw new UnauthorizedException({ messageKey: "auth.unauthorized" });
 		}
 
 		return true;

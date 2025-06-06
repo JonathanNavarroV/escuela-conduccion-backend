@@ -6,15 +6,13 @@ import {
 import { InjectRepository } from "@nestjs/typeorm";
 import * as bcrypt from "bcrypt";
 import { plainToInstance } from "class-transformer";
-import { I18nService } from "nestjs-i18n";
-import { DeleteResult, ILike, Repository, UpdateResult } from "typeorm";
+import { DeleteResult, Repository, UpdateResult } from "typeorm";
 import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
 import { User } from "./entities/user.entity";
 
 @Injectable()
 export class UsersService {
 	constructor(
-		private readonly i18n: I18nService,
 		@InjectRepository(User) private userRepository: Repository<User>,
 	) {}
 
@@ -31,7 +29,9 @@ export class UsersService {
 	async create(createUserDto: CreateUserDto): Promise<User> {
 		const userFound = await this.findOneByEmail(createUserDto.email);
 		if (!!userFound) {
-			throw new ConflictException(this.i18n.translate("users.already_exists"));
+			throw new ConflictException({
+				messageKey: "users.already_exists",
+			});
 		}
 
 		const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
@@ -93,7 +93,7 @@ export class UsersService {
 			},
 		});
 		if (!userFound) {
-			throw new NotFoundException(this.i18n.translate("users.not_found"));
+			throw new NotFoundException({ messageKey: "users.not_found" });
 		}
 
 		return plainToInstance(User, userFound);
@@ -133,15 +133,13 @@ export class UsersService {
 			},
 		});
 		if (!userFound) {
-			throw new NotFoundException(this.i18n.translate("users.not_found"));
+			throw new NotFoundException({ messageKey: "users.not_found" });
 		}
 
 		if (userFound.email !== updateUserDTO.email) {
 			const userEmailFound = await this.findOneByEmail(updateUserDTO.email);
 			if (!!userEmailFound) {
-				throw new ConflictException(
-					this.i18n.translate("users.already_exists"),
-				);
+				throw new ConflictException({ messageKey: "users.already_exists" });
 			}
 		}
 
@@ -167,7 +165,7 @@ export class UsersService {
 			},
 		});
 		if (!userFound) {
-			throw new NotFoundException(this.i18n.translate("users.not_found"));
+			throw new NotFoundException({ messageKey: "users.not_found" });
 		}
 
 		return this.userRepository.delete({ id });

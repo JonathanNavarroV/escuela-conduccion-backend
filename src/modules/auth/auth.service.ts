@@ -1,13 +1,11 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
-import { I18nService } from "nestjs-i18n";
 import { UsersService } from "../users/users.service";
 
 @Injectable()
 export class AuthService {
 	constructor(
-		private readonly i18n: I18nService,
 		private userService: UsersService,
 		private jwtService: JwtService,
 	) {}
@@ -27,16 +25,16 @@ export class AuthService {
 	): Promise<{ access_token: string }> {
 		const user = await this.userService.findOneByEmail(email);
 		if (!user) {
-			throw new UnauthorizedException(
-				this.i18n.translate("auth.invalid_credentials"),
-			);
+			throw new UnauthorizedException({
+				messageKey: "auth.invalid_credentials",
+			});
 		}
 
 		const isMatch = await bcrypt.compare(password, user.password);
 		if (!isMatch) {
-			throw new UnauthorizedException(
-				this.i18n.translate("auth.invalid_credentials"),
-			);
+			throw new UnauthorizedException({
+				messageKey: "auth.invalid_credentials",
+			});
 		}
 
 		// Se crea un payload con el ID e email del usuario autenticado para generar el token
