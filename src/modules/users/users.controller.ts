@@ -13,7 +13,7 @@ import { ApiBearerAuth, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { SuccessMessageKey } from "src/common/decorators/success-message.decorator";
 import { DeleteResult, UpdateResult } from "typeorm";
 import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
-import { User } from "./entities/user.entity";
+import { User, UserRole } from "./entities/user.entity";
 import { UsersService } from "./users.service";
 
 @Controller("users")
@@ -40,6 +40,23 @@ export class UsersController {
 	@SuccessMessageKey("user.created")
 	create(@Body() createUserDto: CreateUserDto): Promise<User> {
 		return this.userService.create(createUserDto);
+	}
+
+	@Get("roles")
+	@ApiOperation({
+		summary: "Obtener todos los roles de usuario",
+		description:
+			"Retorna una lista con todos los roles válidos que puede tener un usuario.",
+	})
+	@ApiResponse({
+		status: 200,
+		description: "Listado de roles obtenido correctamente.",
+		type: String,
+		isArray: true,
+	})
+	@SuccessMessageKey("common.success")
+	findAllRoles(): Array<any> {
+		return Object.values(UserRole);
 	}
 
 	@Get()
