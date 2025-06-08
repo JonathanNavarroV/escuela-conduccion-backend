@@ -155,7 +155,7 @@ export class UsersService {
 	 * Elimina un usuario de la base de datos por su ID.
 	 *
 	 * @param id - ID del usuario a eliminar.
-	 * @returns Una promesa con el resultado de la eliminación
+	 * @returns Una promesa con el resultado de la eliminación.
 	 * @throws {NotFoundException} Si el usuario no existe.
 	 */
 	async remove(id: string): Promise<DeleteResult> {
