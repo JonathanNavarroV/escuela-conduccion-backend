@@ -7,24 +7,32 @@ import { InjectRepository } from "@nestjs/typeorm";
 import * as bcrypt from "bcrypt";
 import { plainToInstance } from "class-transformer";
 import { DeleteResult, Repository, UpdateResult } from "typeorm";
+import { BranchesService } from "../branches/branches.service";
 import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
 import { User } from "./entities/user.entity";
+import { Branch } from "../branches/entities/branch.entity";
 
 @Injectable()
 export class UsersService {
 	constructor(
+		private readonly branchesService: BranchesService,
 		@InjectRepository(User) private userRepository: Repository<User>,
 	) {}
 
 	/**
 	 * Crea un nuevo usuario en la base de datos.
-	 * Verifica si ya existe un usuario con el mismo email antes de crearlo.
-	 * Hashea la contraseña y guarda el usuario.
-	 * Retorna el usuario creado como una instancia de UserEntity, excluyendo la contraseña.
 	 *
-	 * @param createUserDto - Datos necesarios para crear el usuario.
-	 * @returns Una promesa con el usuario creado sin la contraseña.
+	 * - Verifica si ya existe un usuario con el mismo email.
+	 * - Valida y asocia las sedes (branches) si se proporcionan.
+	 * - Hashea la contraseña antes de guardarla.
+	 * - Guarda el nuevo usuario en la base de datos.
+	 * - Devuelve una instancia de la entidad `User`, excluyendo la contraseña gracias al decorador `@Exclude`.
+	 *
+	 * @param createUserDto - Datos necesarios para crear el usuario, incluyendo email, contraseña y sedes.
+	 * @returns Una promesa con el usuario creado (sin la contraseña).
+	 *
 	 * @throws {ConflictException} Si el email ya está registrado.
+	 * @throws {NotFoundException} Si alguna de las sedes (branches) no existe.
 	 */
 	async create(createUserDto: CreateUserDto): Promise<User> {
 		const userFound = await this.findOneByEmail(createUserDto.email);
@@ -34,11 +42,23 @@ export class UsersService {
 			});
 		}
 
+		// Procesamiento de branches
+		let branches: Branch[] = [];
+		if (createUserDto.branchIds?.length) {
+			branches = await Promise.all(
+				createUserDto.branchIds.map((id) =>
+					this.branchesService.findOneById(id),
+				),
+			);
+		}
+
+		// Procesar contraseña
 		const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
 		const newUser = this.userRepository.create({
 			...createUserDto,
 			password: hashedPassword,
+			branches,
 		});
 		const savedUser = await this.userRepository.save(newUser);
 
@@ -115,18 +135,22 @@ export class UsersService {
 
 	/**
 	 * Actualiza los datos de un usuario existente.
-	 * Verifica que el usuario exista y que el nuevo email no esté en uso por otro usuario.
+	 *
+	 * - Verifica si el usuario existe.
+	 * - Valida que el nuevo email no esté registrado por otro usuario.
+	 * - Valida y asocia las nuevas sedes (branches) si se proporcionan.
+	 * - Hashea la nueva contraseña si se proporciona.
+	 * - Reemplaza los datos del usuario existente con los nuevos.
 	 *
 	 * @param id - ID del usuario a actualizar.
-	 * @param updateUserDTO - Datos a actualizar.
-	 * @returns Una promesa con el resultado de la operación.
-	 * @throws {NotFoundException} Si no se encuentra el usuario.
+	 * @param updateUserDTO - Datos a actualizar, incluyendo opcionalmente una nueva contraseña y sedes.
+	 * @returns Una promesa con el usuario actualizado.
+	 *
+	 * @throws {NotFoundException} Si el usuario no existe.
 	 * @throws {ConflictException} Si el nuevo email ya está en uso por otro usuario.
+	 * @throws {NotFoundException} Si alguna de las sedes no existe.
 	 */
-	async update(
-		id: string,
-		updateUserDTO: UpdateUserDto,
-	): Promise<UpdateResult> {
+	async update(id: string, updateUserDTO: UpdateUserDto): Promise<User> {
 		const userFound = await this.userRepository.findOne({
 			where: {
 				id,
@@ -136,6 +160,7 @@ export class UsersService {
 			throw new NotFoundException({ messageKey: "users.not_found" });
 		}
 
+		// Validación de email en uso
 		if (userFound.email !== updateUserDTO.email) {
 			const userEmailFound = await this.findOneByEmail(updateUserDTO.email);
 			if (!!userEmailFound) {
@@ -143,12 +168,29 @@ export class UsersService {
 			}
 		}
 
-		const updateResult = await this.userRepository.update(
-			{ id },
-			updateUserDTO,
-		);
+		// Procesamiento de branches
+		let branches: Branch[] = [];
+		if (updateUserDTO.branchIds?.length) {
+			branches = await Promise.all(
+				updateUserDTO.branchIds.map((id) =>
+					this.branchesService.findOneById(id),
+				),
+			);
+		}
 
-		return updateResult;
+		// Procesar contraseña
+		updateUserDTO.password = await bcrypt.hash(updateUserDTO.password, 10);
+
+		// Actualización de campos
+		Object.assign(userFound, updateUserDTO);
+
+		if (branches.length !== 0) {
+			userFound.branches = branches;
+		}
+
+		const savedUser = await this.userRepository.save(userFound);
+
+		return plainToInstance(User, savedUser);
 	}
 
 	/**

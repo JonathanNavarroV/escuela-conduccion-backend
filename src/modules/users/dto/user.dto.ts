@@ -1,11 +1,14 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from "@nestjs/swagger";
+import { Type } from "class-transformer";
 import {
+	IsArray,
 	IsEmail,
 	IsEnum,
 	IsNotEmpty,
 	IsOptional,
 	IsString,
 	IsUrl,
+	IsUUID,
 	MinLength,
 } from "class-validator";
 import { UserRole } from "../entities/user.entity";
@@ -61,13 +64,20 @@ export class CreateUserDto {
 	photo?: string;
 
 	@IsEnum(UserRole)
-	@IsOptional()
 	@ApiPropertyOptional({
 		enum: UserRole,
 		description: "Rol del usuario",
 		example: UserRole.BRANCH_ADMIN,
 	})
-	role?: UserRole;
+	role: UserRole;
+
+	@IsArray()
+	@IsUUID("all", { each: true })
+	@ApiProperty({
+		description: "IDs de las sedes asociadas al usuario",
+		example: ["ad3cc723-f6fe-4df6-9854-9439f3a85461"],
+	})
+	branchIds: string[];
 }
 
 // PartialType permite que las propiedades sean opcionales

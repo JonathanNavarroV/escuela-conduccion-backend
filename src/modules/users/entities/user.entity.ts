@@ -1,5 +1,7 @@
 import { Exclude } from "class-transformer";
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Branch } from "src/modules/branches/entities/branch.entity";
+import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from "typeorm";
+import { v4 as uuidv4 } from "uuid";
 
 export enum UserRole {
 	SUPER_ADMIN = "super_admin",
@@ -8,8 +10,8 @@ export enum UserRole {
 
 @Entity()
 export class User {
-	@PrimaryGeneratedColumn("uuid")
-	id: string;
+	@PrimaryColumn("uuid")
+	id: string = uuidv4();
 
 	@Column()
 	firstName: string;
@@ -36,4 +38,8 @@ export class User {
 		default: UserRole.BRANCH_ADMIN,
 	})
 	role: UserRole;
+
+	@ManyToMany(() => Branch, (branch) => branch.user, { eager: true })
+	@JoinTable()
+	branches: Branch[];
 }
