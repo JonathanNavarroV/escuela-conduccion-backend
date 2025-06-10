@@ -1,5 +1,9 @@
-import { ApiProperty, ApiPropertyOptional, PartialType } from "@nestjs/swagger";
-import { Type } from "class-transformer";
+import {
+	ApiProperty,
+	ApiPropertyOptional,
+	OmitType,
+	PartialType,
+} from "@nestjs/swagger";
 import {
 	IsArray,
 	IsEmail,
@@ -72,7 +76,8 @@ export class CreateUserDto {
 	role: UserRole;
 
 	@IsArray()
-	@IsUUID("all", { each: true })
+	@IsOptional()
+	@IsUUID(4, { each: true })
 	@ApiProperty({
 		description: "IDs de las sedes asociadas al usuario",
 		example: ["ad3cc723-f6fe-4df6-9854-9439f3a85461"],
@@ -81,4 +86,6 @@ export class CreateUserDto {
 }
 
 // PartialType permite que las propiedades sean opcionales
-export class UpdateUserDto extends PartialType(CreateUserDto) {}
+export class UpdateUserDto extends PartialType(
+	OmitType(CreateUserDto, ["role" as const]),
+) {}

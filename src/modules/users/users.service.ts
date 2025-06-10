@@ -1,4 +1,5 @@
 import {
+	BadRequestException,
 	ConflictException,
 	Injectable,
 	NotFoundException,
@@ -6,11 +7,11 @@ import {
 import { InjectRepository } from "@nestjs/typeorm";
 import * as bcrypt from "bcrypt";
 import { plainToInstance } from "class-transformer";
-import { DeleteResult, Repository, UpdateResult } from "typeorm";
+import { DeleteResult, Repository } from "typeorm";
 import { BranchesService } from "../branches/branches.service";
-import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
-import { User } from "./entities/user.entity";
 import { Branch } from "../branches/entities/branch.entity";
+import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
+import { User, UserRole } from "./entities/user.entity";
 
 @Injectable()
 export class UsersService {
@@ -23,28 +24,49 @@ export class UsersService {
 	 * Crea un nuevo usuario en la base de datos.
 	 *
 	 * - Verifica si ya existe un usuario con el mismo email.
-	 * - Valida y asocia las sedes (branches) si se proporcionan.
-	 * - Hashea la contraseña antes de guardarla.
-	 * - Guarda el nuevo usuario en la base de datos.
-	 * - Devuelve una instancia de la entidad `User`, excluyendo la contraseña gracias al decorador `@Exclude`.
+	 * - Valida el rol del usuario y sus sedes (branches):
+	 *   - Si el rol es `SUPER_ADMIN`, no se deben asignar branches.
+	 *   - Si el rol es `BRANCH_ADMIN`, se deben asignar uno o más branches válidos.
+	 * - Valida la existencia de las sedes proporcionadas.
+	 * - Hashea la contraseña antes de guardar al usuario.
+	 * - Persiste el nuevo usuario en la base de datos.
+	 * - Devuelve una instancia de `User`, excluyendo la contraseña gracias al decorador `@Exclude`.
 	 *
-	 * @param createUserDto - Datos necesarios para crear el usuario, incluyendo email, contraseña y sedes.
-	 * @returns Una promesa con el usuario creado (sin la contraseña).
+	 * @param createUserDto - Datos necesarios para crear el usuario: nombre, email, contraseña, rol y sedes.
+	 * @returns Una promesa que resuelve con el usuario creado (sin la contraseña).
 	 *
-	 * @throws {ConflictException} Si el email ya está registrado.
-	 * @throws {NotFoundException} Si alguna de las sedes (branches) no existe.
+	 * @throws {ConflictException} Si ya existe un usuario con el mismo email.
+	 * @throws {BadRequestException} Si el rol y las sedes están en conflicto:
+	 *   - `users.super_admin_should_not_have_branches` si se asignan branches a un `SUPER_ADMIN`.
+	 *   - `users.branch_admin_requires_branches` si no se asignan branches a un `BRANCH_ADMIN`.
+	 * @throws {NotFoundException} Si alguna de las sedes no existe.
 	 */
 	async create(createUserDto: CreateUserDto): Promise<User> {
-		const userFound = await this.findOneByEmail(createUserDto.email);
+		const { email, password, role, branchIds } = createUserDto;
+
+		const userFound = await this.findOneByEmail(email);
 		if (!!userFound) {
 			throw new ConflictException({
 				messageKey: "users.already_exists",
 			});
 		}
 
-		// Procesamiento de branches
+		// Validar según rol del usuario
 		let branches: Branch[] = [];
-		if (createUserDto.branchIds?.length) {
+
+		if (role === UserRole.SUPER_ADMIN) {
+			if (branchIds?.length) {
+				throw new BadRequestException({
+					messageKey: "users.super_admin_should_not_have_branches",
+				});
+			}
+		} else if (role === UserRole.BRANCH_ADMIN) {
+			if (!branchIds?.length) {
+				throw new BadRequestException({
+					messageKey: "users.branch_admin_requires_branches",
+				});
+			}
+
 			branches = await Promise.all(
 				createUserDto.branchIds.map((id) =>
 					this.branchesService.findOneById(id),
@@ -53,7 +75,7 @@ export class UsersService {
 		}
 
 		// Procesar contraseña
-		const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+		const hashedPassword = await bcrypt.hash(password, 10);
 
 		const newUser = this.userRepository.create({
 			...createUserDto,
@@ -138,19 +160,24 @@ export class UsersService {
 	 *
 	 * - Verifica si el usuario existe.
 	 * - Valida que el nuevo email no esté registrado por otro usuario.
-	 * - Valida y asocia las nuevas sedes (branches) si se proporcionan.
+	 * - Valida y asocia las nuevas sedes (branches) si se proporcionan, según el rol del usuario.
+	 *   - Un `branch_admin` debe tener al menos una sede asociada.
+	 *   - Un `super_admin` no debe tener sedes asociadas.
 	 * - Hashea la nueva contraseña si se proporciona.
 	 * - Reemplaza los datos del usuario existente con los nuevos.
 	 *
 	 * @param id - ID del usuario a actualizar.
 	 * @param updateUserDTO - Datos a actualizar, incluyendo opcionalmente una nueva contraseña y sedes.
-	 * @returns Una promesa con el usuario actualizado.
+	 * @returns Una promesa con el usuario actualizado, sin la contraseña.
 	 *
 	 * @throws {NotFoundException} Si el usuario no existe.
 	 * @throws {ConflictException} Si el nuevo email ya está en uso por otro usuario.
+	 * @throws {BadRequestException} Si las reglas de asociación de sedes no se cumplen según el rol.
 	 * @throws {NotFoundException} Si alguna de las sedes no existe.
 	 */
 	async update(id: string, updateUserDTO: UpdateUserDto): Promise<User> {
+		const { email, password, branchIds, ...rest } = updateUserDTO;
+
 		const userFound = await this.userRepository.findOne({
 			where: {
 				id,
@@ -161,28 +188,42 @@ export class UsersService {
 		}
 
 		// Validación de email en uso
-		if (userFound.email !== updateUserDTO.email) {
-			const userEmailFound = await this.findOneByEmail(updateUserDTO.email);
+		if (userFound.email !== email) {
+			const userEmailFound = await this.findOneByEmail(email);
 			if (!!userEmailFound) {
 				throw new ConflictException({ messageKey: "users.already_exists" });
 			}
+
+			userFound.email = email;
 		}
 
-		// Procesamiento de branches
+		// Validar según rol del usuario
+		const currentRole = userFound.role;
 		let branches: Branch[] = [];
-		if (updateUserDTO.branchIds?.length) {
+
+		if (!!branchIds) {
+			if (currentRole === UserRole.BRANCH_ADMIN && branchIds.length === 0) {
+				throw new BadRequestException({
+					messageKey: "users.branch_admin_requires_branches",
+				});
+			}
+
+			if (currentRole === UserRole.SUPER_ADMIN && branchIds.length > 0) {
+				throw new BadRequestException({
+					messageKey: "users.super_admin_should_not_have_branches",
+				});
+			}
+
 			branches = await Promise.all(
-				updateUserDTO.branchIds.map((id) =>
-					this.branchesService.findOneById(id),
-				),
+				branchIds.map((id) => this.branchesService.findOneById(id)),
 			);
 		}
 
 		// Procesar contraseña
-		updateUserDTO.password = await bcrypt.hash(updateUserDTO.password, 10);
+		userFound.password = await bcrypt.hash(password, 10);
 
 		// Actualización de campos
-		Object.assign(userFound, updateUserDTO);
+		Object.assign(userFound, rest);
 
 		if (branches.length !== 0) {
 			userFound.branches = branches;
