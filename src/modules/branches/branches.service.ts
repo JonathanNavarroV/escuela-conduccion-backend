@@ -10,7 +10,7 @@ import { Branch } from "./entities/branch.entity";
 
 @Injectable()
 export class BranchesService {
-	constructor(
+	public constructor(
 		@InjectRepository(Branch) private branchRepository: Repository<Branch>,
 	) {}
 
@@ -23,7 +23,7 @@ export class BranchesService {
 	 * @returns Una promesa con la sede creada.
 	 * @throws {ConflictException} Si el nombre ya está registrado.
 	 */
-	async create(createBranchDto: CreateBranchDto): Promise<Branch> {
+	public async create(createBranchDto: CreateBranchDto): Promise<Branch> {
 		const branchFound = await this.findOneByName(createBranchDto.name);
 		if (!!branchFound) {
 			throw new ConflictException({
@@ -43,7 +43,7 @@ export class BranchesService {
 	 *
 	 * @returns Una promesa que resuelve con un arreglo de todas las sedes.
 	 */
-	async findAll(): Promise<Branch[]> {
+	public async findAll(): Promise<Branch[]> {
 		const branches = await this.branchRepository.find();
 
 		return branches;
@@ -57,7 +57,7 @@ export class BranchesService {
 	 * @returns Una promesa que resuelve con la sede.
 	 * @throws {NotFoundException} Si no se encuentra una sede con el ID proporcionado.
 	 */
-	async findOneById(id: string): Promise<Branch> {
+	public async findOneById(id: string): Promise<Branch> {
 		const branchFound = await this.branchRepository.findOne({
 			where: {
 				id,
@@ -76,7 +76,7 @@ export class BranchesService {
 	 * @param name - El nombre de la sede a buscar.
 	 * @returns Una promesa que resuelve con la sede si se encuentra, o `null` si no existe
 	 */
-	async findOneByName(name: string): Promise<Branch> {
+	private async findOneByName(name: string): Promise<Branch> {
 		return this.branchRepository.findOne({
 			where: {
 				name,
@@ -94,7 +94,7 @@ export class BranchesService {
 	 * @throws {NotFoundException} Si no se encuentra la sede.
 	 * @throws {ConflictException} Si el nuevo nombre ya está en uso por otra sede.
 	 */
-	async update(
+	public async update(
 		id: string,
 		updateBranchDto: UpdateBranchDto,
 	): Promise<UpdateResult> {
@@ -129,7 +129,7 @@ export class BranchesService {
 	 * @returns Una promesa con el resultado de la eliminación.
 	 * @throws {NotFoundException} Si la sede no existe.
 	 */
-	async remove(id: string): Promise<DeleteResult> {
+	public async remove(id: string): Promise<DeleteResult> {
 		const branchFound = await this.branchRepository.findOne({
 			where: {
 				id,

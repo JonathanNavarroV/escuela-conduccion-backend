@@ -5,29 +5,29 @@ import { v4 as uuidv4 } from "uuid";
 @Entity()
 export class Branch {
 	@PrimaryColumn("uuid")
-	id: string = uuidv4();
+	public id: string = uuidv4();
 
 	@Column({ unique: true })
-	name: string;
+	public name: string;
 
 	@Column()
-	email: string;
+	public email: string;
 
 	@Column({ nullable: true })
-	phone: string;
+	public phone: string;
 
 	@Column()
-	mobile: string;
+	public mobile: string;
 
 	@Column()
-	address: string;
+	public address: string;
 
 	@Column()
-	commune: string;
+	public commune: string;
 
 	@Column()
-	city: string;
+	public city: string;
 
 	@ManyToMany(() => User, (user) => user.branches)
-	user: User[];
+	public user: User[];
 }

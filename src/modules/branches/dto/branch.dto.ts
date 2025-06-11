@@ -8,7 +8,7 @@ export class CreateBranchDto {
 		description: "Nombre de la sede",
 		example: "Maipú",
 	})
-	name: string;
+	public name: string;
 
 	@IsEmail()
 	@IsNotEmpty()
@@ -16,7 +16,7 @@ export class CreateBranchDto {
 		description: "Correo electrónico de la sede",
 		example: "maipu@ejemplo.com",
 	})
-	email: string;
+	public email: string;
 
 	@IsString()
 	@IsNotEmpty()
@@ -24,7 +24,7 @@ export class CreateBranchDto {
 		description: "Número telefónico fijo de la sede",
 		example: "+56 2 1234 5678",
 	})
-	phone: string;
+	public phone: string;
 
 	@IsString()
 	@IsNotEmpty()
@@ -32,7 +32,7 @@ export class CreateBranchDto {
 		description: "Número de teléfono móvil de contacto",
 		example: "+56 9 8765 4321",
 	})
-	mobile: string;
+	public mobile: string;
 
 	@IsString()
 	@IsNotEmpty()
@@ -40,7 +40,7 @@ export class CreateBranchDto {
 		description: "Dirección física de la sede",
 		example: "Av. Pajaritos 1234",
 	})
-	address: string;
+	public address: string;
 
 	@IsString()
 	@IsNotEmpty()
@@ -48,7 +48,7 @@ export class CreateBranchDto {
 		description: "Comuna donde se ubica la sede",
 		example: "Maipú",
 	})
-	commune: string;
+	public commune: string;
 
 	@IsString()
 	@IsNotEmpty()
@@ -56,7 +56,7 @@ export class CreateBranchDto {
 		description: "Ciudad donde se ubica la sede",
 		example: "Santiago",
 	})
-	city: string;
+	public city: string;
 }
 
 export class UpdateBranchDto extends PartialType(CreateBranchDto) {}

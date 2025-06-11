@@ -15,7 +15,7 @@ import { User, UserRole } from "./entities/user.entity";
 
 @Injectable()
 export class UsersService {
-	constructor(
+	public constructor(
 		private readonly branchesService: BranchesService,
 		@InjectRepository(User) private userRepository: Repository<User>,
 	) {}
@@ -41,7 +41,7 @@ export class UsersService {
 	 *   - `users.branch_admin_requires_branches` si no se asignan branches a un `BRANCH_ADMIN`.
 	 * @throws {NotFoundException} Si alguna de las sedes no existe.
 	 */
-	async create(createUserDto: CreateUserDto): Promise<User> {
+	public async create(createUserDto: CreateUserDto): Promise<User> {
 		const { email, password, role, branchIds } = createUserDto;
 
 		const userFound = await this.findOneByEmail(email);
@@ -94,7 +94,7 @@ export class UsersService {
 	 *
 	 * @returns Una promesa que resuelve con un arreglo de todos los usuarios sin la contraseña.
 	 */
-	async findAll(): Promise<User[]> {
+	public async findAll(): Promise<User[]> {
 		const users = await this.userRepository.find();
 
 		return plainToInstance(User, users);
@@ -108,7 +108,7 @@ export class UsersService {
 	 * @returns Una promesa que resuelve con un arreglo de usuarios que coinciden.
 	 * @throws {NotFoundException} Si no se encuentra ningún usuario que coincida con el término.
 	 */
-	async searchByFullName(searchTerm: string): Promise<User[]> {
+	public async searchByFullName(searchTerm: string): Promise<User[]> {
 		const usersFound = await this.userRepository
 			.createQueryBuilder("user")
 			.where(
@@ -128,7 +128,7 @@ export class UsersService {
 	 * @returns Una promesa que resuelve con el usuario sin la contraseña.
 	 * @throws {NotFoundException} Si no se encuentra un usuario con el ID proporcionado.
 	 */
-	async findOneById(id: string): Promise<User> {
+	public async findOneById(id: string): Promise<User> {
 		const userFound = await this.userRepository.findOne({
 			where: {
 				id,
@@ -147,7 +147,7 @@ export class UsersService {
 	 * @param email - El correo electrónico del usuario a buscar.
 	 * @returns Una promesa que resuelve con el usuario si se encuentra, o `null` si no existe
 	 */
-	async findOneByEmail(email: string): Promise<User> {
+	public async findOneByEmail(email: string): Promise<User> {
 		return this.userRepository.findOne({
 			where: {
 				email,
@@ -175,7 +175,7 @@ export class UsersService {
 	 * @throws {BadRequestException} Si las reglas de asociación de sedes no se cumplen según el rol.
 	 * @throws {NotFoundException} Si alguna de las sedes no existe.
 	 */
-	async update(id: string, updateUserDTO: UpdateUserDto): Promise<User> {
+	public async update(id: string, updateUserDTO: UpdateUserDto): Promise<User> {
 		const { email, password, branchIds, ...rest } = updateUserDTO;
 
 		const userFound = await this.userRepository.findOne({
@@ -241,7 +241,7 @@ export class UsersService {
 	 * @returns Una promesa con el resultado de la eliminación.
 	 * @throws {NotFoundException} Si el usuario no existe.
 	 */
-	async remove(id: string): Promise<DeleteResult> {
+	public async remove(id: string): Promise<DeleteResult> {
 		const userFound = await this.userRepository.findOne({
 			where: {
 				id,

@@ -9,11 +9,14 @@ import { map, Observable } from "rxjs";
 
 @Injectable()
 export class ResponseInterceptor<T> implements NestInterceptor<T, any> {
-	constructor(
+	public constructor(
 		private reflector: Reflector, // Se inyecta el reflector para poder leer la metadata
 	) {}
 
-	intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+	public intercept(
+		context: ExecutionContext,
+		next: CallHandler,
+	): Observable<any> {
 		const response = context.switchToHttp().getResponse();
 
 		// Se obtiene el mensaje de éxito desde la metadata si es que existe

@@ -18,7 +18,7 @@ import { Branch } from "./entities/branch.entity";
 @Controller("branches")
 @ApiBearerAuth()
 export class BranchesController {
-	constructor(private readonly branchService: BranchesService) {}
+	public constructor(private readonly branchService: BranchesService) {}
 
 	@Post()
 	@ApiOperation({
@@ -36,7 +36,7 @@ export class BranchesController {
 		description: "Ya existe una sede con ese nombre.",
 	})
 	@SuccessMessageKey("branch.created")
-	create(@Body() createBranchDto: CreateBranchDto): Promise<Branch> {
+	public create(@Body() createBranchDto: CreateBranchDto): Promise<Branch> {
 		return this.branchService.create(createBranchDto);
 	}
 
@@ -53,7 +53,7 @@ export class BranchesController {
 		isArray: true,
 	})
 	@SuccessMessageKey("common.success")
-	findAll(): Promise<Branch[]> {
+	public findAll(): Promise<Branch[]> {
 		return this.branchService.findAll();
 	}
 
@@ -72,7 +72,7 @@ export class BranchesController {
 		description: "No se encontró una sede con el ID proporcionado.",
 	})
 	@SuccessMessageKey("common.success")
-	findOneById(@Param("id", ParseUUIDPipe) id: string): Promise<Branch> {
+	public findOneById(@Param("id", ParseUUIDPipe) id: string): Promise<Branch> {
 		return this.branchService.findOneById(id);
 	}
 
@@ -95,7 +95,7 @@ export class BranchesController {
 		description: "Ya existe una sede con ese nombre.",
 	})
 	@SuccessMessageKey("branch.updated")
-	update(
+	public update(
 		@Param("id", ParseUUIDPipe) id: string,
 		@Body() updateBranchDto: UpdateBranchDto,
 	): Promise<UpdateResult> {
@@ -116,7 +116,7 @@ export class BranchesController {
 		description: "Sede no encontrada.",
 	})
 	@SuccessMessageKey("branch.deleted")
-	remove(@Param("id", ParseUUIDPipe) id: string): Promise<DeleteResult> {
+	public remove(@Param("id", ParseUUIDPipe) id: string): Promise<DeleteResult> {
 		return this.branchService.remove(id);
 	}
 }

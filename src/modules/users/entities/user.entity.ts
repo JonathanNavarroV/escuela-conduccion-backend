@@ -11,35 +11,35 @@ export enum UserRole {
 @Entity()
 export class User {
 	@PrimaryColumn("uuid")
-	id: string = uuidv4();
+	public id: string = uuidv4();
 
 	@Column()
-	firstName: string;
+	public firstName: string;
 
 	@Column()
-	lastNameFather: string;
+	public lastNameFather: string;
 
 	@Column()
-	lastNameMother: string;
+	public lastNameMother: string;
 
 	@Column({ unique: true })
-	email: string;
+	public email: string;
 
 	@Column()
 	@Exclude()
-	password: string;
+	public password: string;
 
 	@Column({ nullable: true })
-	photo: string;
+	public photo: string;
 
 	@Column({
 		type: "varchar",
 		length: 30,
 		default: UserRole.BRANCH_ADMIN,
 	})
-	role: UserRole;
+	public role: UserRole;
 
 	@ManyToMany(() => Branch, (branch) => branch.user, { eager: true })
 	@JoinTable()
-	branches: Branch[];
+	public branches: Branch[];
 }

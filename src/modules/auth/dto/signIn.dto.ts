@@ -8,7 +8,7 @@ export class SignInDto {
 		description: "Correo electrónico del usuario",
 		example: "juan.perez@ejemplo.com",
 	})
-	email: string;
+	public email: string;
 
 	@IsString()
 	@IsNotEmpty()
@@ -17,5 +17,5 @@ export class SignInDto {
 		description: "Contraseña del usuario (Mínimo 6 caracteres)",
 		example: "contraseña.segura.123",
 	})
-	password: string;
+	public password: string;
 }
