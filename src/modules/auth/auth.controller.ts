@@ -46,7 +46,7 @@ export class AuthController {
 	@Get("validate-token")
 	@UseGuards(AuthGuard)
 	@HttpCode(HttpStatus.OK)
-	validateToken(@Request() req): { valid: true } {
+	validateToken(@Request() _req): { valid: true } {
 		return { valid: true };
 	}
 }
