@@ -10,7 +10,7 @@ import { Request } from "express";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-	constructor(
+	public constructor(
 		private jwtService: JwtService,
 		private configService: ConfigService,
 	) {}
@@ -25,7 +25,7 @@ export class AuthGuard implements CanActivate {
 	 * @returns `true` si la autenticación fue exitosa.
 	 * @throws {UnauthorizedException} Si no se encuentra el token o si es inválido
 	 */
-	async canActivate(context: ExecutionContext): Promise<boolean> {
+	public async canActivate(context: ExecutionContext): Promise<boolean> {
 		// Se obtiene el objeto Request de la solicitud actual
 		const request = context.switchToHttp().getRequest();
 		// Se extrae el token de la cabecera de autorización

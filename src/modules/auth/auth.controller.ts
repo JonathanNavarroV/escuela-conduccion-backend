@@ -16,7 +16,7 @@ import { SignInDto } from "./dto/signIn.dto";
 
 @Controller("auth")
 export class AuthController {
-	constructor(private authService: AuthService) {}
+	public constructor(private authService: AuthService) {}
 
 	@Post("login")
 	@ApiOperation({
@@ -39,14 +39,16 @@ export class AuthController {
 	})
 	@HttpCode(HttpStatus.OK) // Si la solicitud es exitosa, se devuelve un status 200
 	@SuccessMessageKey("auth.successful_login")
-	signIn(@Body() signInDto: SignInDto): Promise<{ access_token: string }> {
+	public signIn(
+		@Body() signInDto: SignInDto,
+	): Promise<{ access_token: string }> {
 		return this.authService.signIn(signInDto.email, signInDto.password);
 	}
 
 	@Get("validate-token")
 	@UseGuards(AuthGuard)
 	@HttpCode(HttpStatus.OK)
-	validateToken(@Request() req): { valid: true } {
+	public validateToken(@Request() _req): { valid: true } {
 		return { valid: true };
 	}
 }

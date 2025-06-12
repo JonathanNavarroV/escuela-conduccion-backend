@@ -5,7 +5,7 @@ import { UsersService } from "../users/users.service";
 
 @Injectable()
 export class AuthService {
-	constructor(
+	public constructor(
 		private userService: UsersService,
 		private jwtService: JwtService,
 	) {}
@@ -19,7 +19,7 @@ export class AuthService {
 	 * @returns Un objeto con el token de acceso JWT generado.
 	 * @throws {UnauthorizedException} Si las credenciales son inválidas. Por razones de seguridad, no se especifica si el error es por correo inexistente o la contraseña incorrecta.
 	 */
-	async signIn(
+	public async signIn(
 		email: string,
 		password: string,
 	): Promise<{ access_token: string }> {

@@ -11,7 +11,7 @@ import {
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { SuccessMessageKey } from "src/common/decorators/success-message.decorator";
-import { DeleteResult, UpdateResult } from "typeorm";
+import { DeleteResult } from "typeorm";
 import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
 import { User, UserRole } from "./entities/user.entity";
 import { UsersService } from "./users.service";
@@ -20,7 +20,7 @@ import { UsersService } from "./users.service";
 // @UseGuards(AuthGuard)
 @ApiBearerAuth()
 export class UsersController {
-	constructor(private readonly userService: UsersService) {}
+	public constructor(private readonly userService: UsersService) {}
 
 	@Post()
 	@ApiOperation({
@@ -38,7 +38,7 @@ export class UsersController {
 		description: "Ya existe un usuario con ese correo electrónico.",
 	})
 	@SuccessMessageKey("user.created")
-	create(@Body() createUserDto: CreateUserDto): Promise<User> {
+	public create(@Body() createUserDto: CreateUserDto): Promise<User> {
 		return this.userService.create(createUserDto);
 	}
 
@@ -55,7 +55,7 @@ export class UsersController {
 		isArray: true,
 	})
 	@SuccessMessageKey("common.success")
-	findAllRoles(): Array<any> {
+	public findAllRoles(): Array<any> {
 		return Object.values(UserRole);
 	}
 
@@ -72,7 +72,7 @@ export class UsersController {
 		isArray: true,
 	})
 	@SuccessMessageKey("common.success")
-	findAll(): Promise<User[]> {
+	public findAll(): Promise<User[]> {
 		return this.userService.findAll();
 	}
 
@@ -92,7 +92,9 @@ export class UsersController {
 		description: "No se encontraron usuarios que coincidan con la búsqueda.",
 	})
 	@SuccessMessageKey("common.success")
-	searchByFullName(@Query("fullName") searchTerm: string): Promise<User[]> {
+	public searchByFullName(
+		@Query("fullName") searchTerm: string,
+	): Promise<User[]> {
 		return this.userService.searchByFullName(searchTerm);
 	}
 
@@ -111,7 +113,7 @@ export class UsersController {
 		description: "No se encontró un usuario con el ID proporcionado.",
 	})
 	@SuccessMessageKey("common.success")
-	findOneById(@Param("id", ParseUUIDPipe) id: string): Promise<User> {
+	public findOneById(@Param("id", ParseUUIDPipe) id: string): Promise<User> {
 		return this.userService.findOneById(id);
 	}
 
@@ -134,10 +136,10 @@ export class UsersController {
 		description: "Ya existe un usuario con ese correo electrónico.",
 	})
 	@SuccessMessageKey("user.updated")
-	update(
+	public update(
 		@Param("id", ParseUUIDPipe) id: string,
 		@Body() updateUserDto: UpdateUserDto,
-	): Promise<UpdateResult> {
+	): Promise<User> {
 		return this.userService.update(id, updateUserDto);
 	}
 
@@ -155,7 +157,7 @@ export class UsersController {
 		description: "Usuario no encontrado.",
 	})
 	@SuccessMessageKey("user.deleted")
-	remove(@Param("id", ParseUUIDPipe) id: string): Promise<DeleteResult> {
+	public remove(@Param("id", ParseUUIDPipe) id: string): Promise<DeleteResult> {
 		return this.userService.remove(id);
 	}
 }

@@ -1,11 +1,18 @@
-import { ApiProperty, ApiPropertyOptional, PartialType } from "@nestjs/swagger";
 import {
+	ApiProperty,
+	ApiPropertyOptional,
+	OmitType,
+	PartialType,
+} from "@nestjs/swagger";
+import {
+	IsArray,
 	IsEmail,
 	IsEnum,
 	IsNotEmpty,
 	IsOptional,
 	IsString,
 	IsUrl,
+	IsUUID,
 	MinLength,
 } from "class-validator";
 import { UserRole } from "../entities/user.entity";
@@ -17,7 +24,7 @@ export class CreateUserDto {
 		description: "Nombre del usuario",
 		example: "Juan Carlos",
 	})
-	firstName: string;
+	public firstName: string;
 
 	@IsString()
 	@IsNotEmpty()
@@ -25,7 +32,7 @@ export class CreateUserDto {
 		description: "Apellido paterno del usuario",
 		example: "Pérez",
 	})
-	lastNameFather: string;
+	public lastNameFather: string;
 
 	@IsString()
 	@IsNotEmpty()
@@ -33,7 +40,7 @@ export class CreateUserDto {
 		description: "Apellido materno del usuario",
 		example: "González",
 	})
-	lastNameMother: string;
+	public lastNameMother: string;
 
 	@IsEmail()
 	@IsNotEmpty()
@@ -41,7 +48,7 @@ export class CreateUserDto {
 		description: "Correo electrónico del usuario",
 		example: "juan.perez@ejemplo.com",
 	})
-	email: string;
+	public email: string;
 
 	@IsString()
 	@IsNotEmpty()
@@ -50,7 +57,7 @@ export class CreateUserDto {
 		description: "Contraseña del usuario (Mínimo 6 caracteres)",
 		example: "contraseña.segura.123",
 	})
-	password: string;
+	public password: string;
 
 	@IsUrl()
 	@IsOptional()
@@ -58,17 +65,27 @@ export class CreateUserDto {
 		description: "URL de la foto de perfil",
 		example: "https://ejemplo.com/juan.jpg",
 	})
-	photo?: string;
+	public photo?: string;
 
 	@IsEnum(UserRole)
-	@IsOptional()
 	@ApiPropertyOptional({
 		enum: UserRole,
 		description: "Rol del usuario",
 		example: UserRole.BRANCH_ADMIN,
 	})
-	role?: UserRole;
+	public role: UserRole;
+
+	@IsArray()
+	@IsOptional()
+	@IsUUID(4, { each: true })
+	@ApiProperty({
+		description: "IDs de las sedes asociadas al usuario",
+		example: ["ad3cc723-f6fe-4df6-9854-9439f3a85461"],
+	})
+	public branchIds: string[];
 }
 
 // PartialType permite que las propiedades sean opcionales
-export class UpdateUserDto extends PartialType(CreateUserDto) {}
+export class UpdateUserDto extends PartialType(
+	OmitType(CreateUserDto, ["role"] as const),
+) {}
