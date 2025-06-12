@@ -220,7 +220,9 @@ export class UsersService {
 		}
 
 		// Procesar contraseña
-		userFound.password = await bcrypt.hash(password, 10);
+		if (password) {
+			userFound.password = await bcrypt.hash(password, 10);
+		}
 
 		// Actualización de campos
 		Object.assign(userFound, rest);

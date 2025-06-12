@@ -87,5 +87,5 @@ export class CreateUserDto {
 
 // PartialType permite que las propiedades sean opcionales
 export class UpdateUserDto extends PartialType(
-	OmitType(CreateUserDto, ["role" as const]),
+	OmitType(CreateUserDto, ["role"] as const),
 ) {}
