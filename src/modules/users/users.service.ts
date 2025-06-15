@@ -101,12 +101,10 @@ export class UsersService {
 	}
 
 	/**
-	 * Busca usuarios cuyo nombre completo (nombre + apellidos) contiene el término de búsqueda,
-	 * ignorando mayúsculas, minúsculas y tildes.
+	 * Busca usuarios cuyo nombre completo (nombre + apellidos) contiene el término de búsqueda, ignorando mayúsculas, minúsculas y tildes.
 	 *
 	 * @param searchTerm - Texto parcial para buscar en el nombre completo.
 	 * @returns Una promesa que resuelve con un arreglo de usuarios que coinciden.
-	 * @throws {NotFoundException} Si no se encuentra ningún usuario que coincida con el término.
 	 */
 	public async searchByFullName(searchTerm: string): Promise<User[]> {
 		const usersFound = await this.userRepository

@@ -93,7 +93,7 @@ export class UsersController {
 	})
 	@SuccessMessageKey("common.success")
 	public searchByFullName(
-		@Query("fullName") searchTerm: string,
+		@Query("searchTerm") searchTerm: string,
 	): Promise<User[]> {
 		return this.userService.searchByFullName(searchTerm);
 	}
