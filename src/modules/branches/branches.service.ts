@@ -50,6 +50,23 @@ export class BranchesService {
 	}
 
 	/**
+	 * Busca sedes cuyo nombre contiene el término de búsqueda, ignorando mayúscula, minúsculo y tildes
+	 *
+	 * @param searchTerm - Texto parcial para buscar el nombre.
+	 * @returns Una promesa que resuelve con un arreglo de sedes que coinciden.
+	 */
+	public async searchByName(searchTerm: string): Promise<Branch[]> {
+		const branchFound = await this.branchRepository
+			.createQueryBuilder("branch")
+			.where(`branch.name COLLATE Latin1_General_CI_AI LIKE :searchTerm`, {
+				searchTerm: `%${searchTerm}%`,
+			})
+			.getMany();
+
+		return branchFound;
+	}
+
+	/**
 	 * Busca una sede por su ID.
 	 * Si se encuentra, retorna la sede como una instancia de UserEntity.
 	 *

@@ -7,6 +7,7 @@ import {
 	ParseUUIDPipe,
 	Patch,
 	Post,
+	Query,
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { SuccessMessageKey } from "src/common/decorators/success-message.decorator";
@@ -55,6 +56,28 @@ export class BranchesController {
 	@SuccessMessageKey("common.success")
 	public findAll(): Promise<Branch[]> {
 		return this.branchService.findAll();
+	}
+
+	@Get("search")
+	@ApiOperation({
+		summary: "Buscar sedes por coincidencia de nombre",
+		description:
+			"Devuelve una lista de sedes cuyo nombre coincida parcialmente con el valor proporcionado.",
+	})
+	@ApiResponse({
+		status: 200,
+		description: "Sedes encontradas que coinciden con la búsqueda.",
+		type: Branch,
+	})
+	@ApiResponse({
+		status: 402,
+		description: "No se encontraron sedes que coincidan con la búsqueda.",
+	})
+	@SuccessMessageKey("common.success")
+	public searchByName(
+		@Query("searchTerm") searchTerm: string,
+	): Promise<Branch[]> {
+		return this.branchService.searchByName(searchTerm);
 	}
 
 	@Get(":id")
