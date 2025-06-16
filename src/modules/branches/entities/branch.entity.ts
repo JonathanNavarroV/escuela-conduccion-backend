@@ -23,7 +23,7 @@ export class Branch {
 	public address: string;
 
 	@Column()
-	public commune: string;
+	public district: string;
 
 	@Column()
 	public city: string;

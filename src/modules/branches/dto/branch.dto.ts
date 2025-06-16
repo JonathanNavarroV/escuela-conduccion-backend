@@ -54,7 +54,7 @@ export class CreateBranchDto {
 		description: "Comuna donde se ubica la sede.",
 		example: "Maipú",
 	})
-	public commune: string;
+	public district: string;
 
 	@IsString()
 	@IsNotEmpty()
