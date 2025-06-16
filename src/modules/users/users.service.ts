@@ -186,7 +186,7 @@ export class UsersService {
 		}
 
 		// Validación de email en uso
-		if (userFound.email !== email) {
+		if (email && userFound.email !== email) {
 			const userEmailFound = await this.findOneByEmail(email);
 			if (!!userEmailFound) {
 				throw new ConflictException({ messageKey: "users.already_exists" });
