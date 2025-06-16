@@ -4,7 +4,6 @@ import {
 	IsEmail,
 	IsEnum,
 	IsNotEmpty,
-	IsOptional,
 	IsString,
 	IsUrl,
 	IsUUID,
@@ -55,12 +54,11 @@ export class CreateUserDto {
 	public password: string;
 
 	@IsUrl()
-	@IsOptional()
 	@ApiProperty({
 		description: "URL de la foto de perfil",
 		example: "https://ejemplo.com/juan.jpg",
 	})
-	public photo?: string;
+	public photo: string;
 
 	@IsEnum(UserRole)
 	@ApiProperty({
@@ -71,7 +69,6 @@ export class CreateUserDto {
 	public role: UserRole;
 
 	@IsArray()
-	@IsOptional()
 	@IsUUID(4, { each: true })
 	@ApiProperty({
 		description: "IDs de las sedes asociadas al usuario",
