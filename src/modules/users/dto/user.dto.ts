@@ -1,9 +1,4 @@
-import {
-	ApiProperty,
-	ApiPropertyOptional,
-	OmitType,
-	PartialType,
-} from "@nestjs/swagger";
+import { ApiProperty, OmitType, PartialType } from "@nestjs/swagger";
 import {
 	IsArray,
 	IsEmail,
@@ -61,14 +56,14 @@ export class CreateUserDto {
 
 	@IsUrl()
 	@IsOptional()
-	@ApiPropertyOptional({
+	@ApiProperty({
 		description: "URL de la foto de perfil",
 		example: "https://ejemplo.com/juan.jpg",
 	})
 	public photo?: string;
 
 	@IsEnum(UserRole)
-	@ApiPropertyOptional({
+	@ApiProperty({
 		enum: UserRole,
 		description: "Rol del usuario",
 		example: UserRole.BRANCH_ADMIN,

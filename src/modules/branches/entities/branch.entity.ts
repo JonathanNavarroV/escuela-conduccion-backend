@@ -28,6 +28,9 @@ export class Branch {
 	@Column()
 	public city: string;
 
+	@Column({ default: true })
+	public isActive: boolean;
+
 	@ManyToMany(() => User, (user) => user.branches)
 	public user: User[];
 }

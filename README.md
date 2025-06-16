@@ -28,6 +28,33 @@ Este es el backend de la plataforma para gestión de una escuela de conducción.
 
 ---
 
+## 🚀 Migraciones de Base de Datos
+
+El proyecto utiliza migraciones con **TypeORM** para gestionar cambios en la base de datos de forma controlada y segura.
+
+### Comandos principales para migraciones
+
+- `npm run migration:create src/migrations/<Nombre>`  
+  Crea una migración vacía para que escribas manualmente los cambios.
+
+- `npm run migration:generate src/migrations/<Nombre>`  
+  Genera automáticamente una migración basada en los cambios detectados en las entidades.
+
+- `npm run migration:run`  
+  Ejecuta todas las migraciones pendientes en la base de datos.
+
+- `npm run migration:revert`  
+  Revierte la última migración aplicada.
+
+### Consideraciones importantes
+
+- Cuando agregues columnas **NOT NULL** en tablas ya existentes, siempre define un **valor por defecto** para evitar errores al ejecutar la migración (por ejemplo, `DEFAULT 1` para un campo booleano).
+- No borres las migraciones ya aplicadas para mantener el historial de cambios y asegurar coherencia en entornos distintos.
+- Las migraciones se encuentran en la carpeta `src/migrations`.
+- Para crear migraciones usa nombres descriptivos que indiquen el propósito, por ejemplo: `AddIsActiveToUser`.
+
+---
+
 ## Instalación y uso
 
 ### 1. Clona el repositorio:

@@ -24,7 +24,7 @@ import { UsersModule } from "./modules/users/users.module";
 			password: process.env.DB_PASSWORD,
 			database: process.env.DB_DATABASE,
 			entities: [__dirname + `/**/**/*.entity{.ts,.js}`],
-			synchronize: true,
+			synchronize: false,
 			options: {
 				encrypt: true, // Necesario para conexiones SSL con SQL Server
 				trustServerCertificate: true, // Desactiva la validación del certificado para conexiones de SQL Server

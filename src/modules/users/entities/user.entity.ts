@@ -39,6 +39,9 @@ export class User {
 	})
 	public role: UserRole;
 
+	@Column({ default: true })
+	public isActive: boolean;
+
 	@ManyToMany(() => Branch, (branch) => branch.user, { eager: true })
 	@JoinTable()
 	public branches: Branch[];
