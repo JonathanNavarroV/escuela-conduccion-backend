@@ -15,7 +15,7 @@ export class CreateUserDto {
 	@IsString()
 	@IsNotEmpty()
 	@ApiProperty({
-		description: "Nombre del usuario",
+		description: "Nombre del usuario.",
 		example: "Juan Carlos",
 	})
 	public firstName: string;
@@ -23,7 +23,7 @@ export class CreateUserDto {
 	@IsString()
 	@IsNotEmpty()
 	@ApiProperty({
-		description: "Apellido paterno del usuario",
+		description: "Apellido paterno del usuario.",
 		example: "Pérez",
 	})
 	public lastNameFather: string;
@@ -31,7 +31,7 @@ export class CreateUserDto {
 	@IsString()
 	@IsNotEmpty()
 	@ApiProperty({
-		description: "Apellido materno del usuario",
+		description: "Apellido materno del usuario.",
 		example: "González",
 	})
 	public lastNameMother: string;
@@ -39,7 +39,7 @@ export class CreateUserDto {
 	@IsEmail()
 	@IsNotEmpty()
 	@ApiProperty({
-		description: "Correo electrónico del usuario",
+		description: "Correo electrónico del usuario.",
 		example: "juan.perez@ejemplo.com",
 	})
 	public email: string;
@@ -48,14 +48,14 @@ export class CreateUserDto {
 	@IsNotEmpty()
 	@MinLength(6)
 	@ApiProperty({
-		description: "Contraseña del usuario (Mínimo 6 caracteres)",
+		description: "Contraseña del usuario (Mínimo 6 caracteres).",
 		example: "contraseña.segura.123",
 	})
 	public password: string;
 
 	@IsUrl()
 	@ApiProperty({
-		description: "URL de la foto de perfil",
+		description: "URL de la foto de perfil.",
 		example: "https://ejemplo.com/juan.jpg",
 	})
 	public photo: string;
@@ -71,7 +71,7 @@ export class CreateUserDto {
 	@IsArray()
 	@IsUUID(4, { each: true })
 	@ApiProperty({
-		description: "IDs de las sedes asociadas al usuario",
+		description: "IDs de las sedes asociadas al usuario.",
 		example: ["ad3cc723-f6fe-4df6-9854-9439f3a85461"],
 	})
 	public branchIds: string[];

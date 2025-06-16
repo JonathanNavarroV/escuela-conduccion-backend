@@ -5,7 +5,7 @@ export class CreateBranchDto {
 	@IsString()
 	@IsNotEmpty()
 	@ApiProperty({
-		description: "Nombre de la sede",
+		description: "Nombre de la sede.",
 		example: "Maipú",
 	})
 	public name: string;
@@ -13,7 +13,7 @@ export class CreateBranchDto {
 	@IsEmail()
 	@IsNotEmpty()
 	@ApiProperty({
-		description: "Correo electrónico de la sede",
+		description: "Correo electrónico de la sede.",
 		example: "maipu@ejemplo.com",
 	})
 	public email: string;
@@ -21,7 +21,7 @@ export class CreateBranchDto {
 	@IsString()
 	@IsNotEmpty()
 	@ApiProperty({
-		description: "Número telefónico fijo de la sede",
+		description: "Número telefónico fijo de la sede.",
 		example: "+56 2 1234 5678",
 	})
 	public phone: string;
@@ -29,7 +29,7 @@ export class CreateBranchDto {
 	@IsString()
 	@IsNotEmpty()
 	@ApiProperty({
-		description: "Número de teléfono móvil de contacto",
+		description: "Número de teléfono móvil de contacto.",
 		example: "+56 9 8765 4321",
 	})
 	public mobile: string;
@@ -37,7 +37,7 @@ export class CreateBranchDto {
 	@IsString()
 	@IsNotEmpty()
 	@ApiProperty({
-		description: "Dirección física de la sede",
+		description: "Dirección física de la sede.",
 		example: "Av. Pajaritos 1234",
 	})
 	public address: string;
@@ -45,7 +45,7 @@ export class CreateBranchDto {
 	@IsString()
 	@IsNotEmpty()
 	@ApiProperty({
-		description: "Comuna donde se ubica la sede",
+		description: "Comuna donde se ubica la sede.",
 		example: "Maipú",
 	})
 	public commune: string;
@@ -53,7 +53,7 @@ export class CreateBranchDto {
 	@IsString()
 	@IsNotEmpty()
 	@ApiProperty({
-		description: "Ciudad donde se ubica la sede",
+		description: "Ciudad donde se ubica la sede.",
 		example: "Santiago",
 	})
 	public city: string;
