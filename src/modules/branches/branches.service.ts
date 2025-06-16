@@ -121,6 +121,8 @@ export class BranchesService {
 		id: string,
 		updateBranchDto: UpdateBranchDto,
 	): Promise<Branch> {
+		const { name, ...rest } = updateBranchDto;
+
 		const branchFound = await this.branchRepository.findOne({
 			where: {
 				id,
@@ -131,15 +133,17 @@ export class BranchesService {
 		}
 
 		// Validar si el nuevo nombre ya está en uso por otra sede
-		if (branchFound.name !== updateBranchDto.name) {
+		if (name && branchFound.name !== name) {
 			const branchNameFound = await this.findOneByName(updateBranchDto.name);
 			if (!!branchNameFound) {
 				throw new ConflictException({ messageKey: "branches.already_exists" });
 			}
+
+			branchFound.name = name;
 		}
 
 		// Actualización de campos
-		Object.assign(branchFound, updateBranchDto);
+		Object.assign(branchFound, rest);
 
 		const updateBranch = await this.branchRepository.save(branchFound);
 
