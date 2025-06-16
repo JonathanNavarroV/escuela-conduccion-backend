@@ -4,7 +4,7 @@ import {
 	NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { DeleteResult, Repository, UpdateResult } from "typeorm";
+import { Repository } from "typeorm";
 import { CreateBranchDto, UpdateBranchDto } from "./dto/branch.dto";
 import { Branch } from "./entities/branch.entity";
 
@@ -21,6 +21,7 @@ export class BranchesService {
 	 *
 	 * @param createBranchDto - Datos necesarios para crear la sede.
 	 * @returns Una promesa con la sede creada.
+	 *
 	 * @throws {ConflictException} Si el nombre ya está registrado.
 	 */
 	public async create(createBranchDto: CreateBranchDto): Promise<Branch> {
@@ -72,6 +73,7 @@ export class BranchesService {
 	 *
 	 * @param id - ID de la sede (UUID).
 	 * @returns Una promesa que resuelve con la sede.
+	 *
 	 * @throws {NotFoundException} Si no se encuentra una sede con el ID proporcionado.
 	 */
 	public async findOneById(id: string): Promise<Branch> {
@@ -103,18 +105,24 @@ export class BranchesService {
 
 	/**
 	 * Actualiza los datos de una sede existente.
-	 * Verifica que la sede exista y que el nuevo nombre no esté en uso por otra sede.
+	 *
+	 * - Verifica si la sede existe.
+	 * - Valida que el nuevo nombre no esté en uso por otra sede.
+	 * - Reemplaza los datos de la sede existente con los nuevos.
 	 *
 	 * @param id - ID de la sede a actualizar.
 	 * @param updateBranchDto - Datos a actualizar.
-	 * @returns Una promesa con el resultado de la operación.
+	 * @returns Una promesa con la sede actualizada.
+	 *
 	 * @throws {NotFoundException} Si no se encuentra la sede.
 	 * @throws {ConflictException} Si el nuevo nombre ya está en uso por otra sede.
 	 */
 	public async update(
 		id: string,
 		updateBranchDto: UpdateBranchDto,
-	): Promise<UpdateResult> {
+	): Promise<Branch> {
+		const { name, ...rest } = updateBranchDto;
+
 		const branchFound = await this.branchRepository.findOne({
 			where: {
 				id,
@@ -124,38 +132,21 @@ export class BranchesService {
 			throw new NotFoundException({ messageKey: "branches.not_found" });
 		}
 
-		if (branchFound.name !== updateBranchDto.name) {
+		// Validar si el nuevo nombre ya está en uso por otra sede
+		if (name && branchFound.name !== name) {
 			const branchNameFound = await this.findOneByName(updateBranchDto.name);
 			if (!!branchNameFound) {
 				throw new ConflictException({ messageKey: "branches.already_exists" });
 			}
+
+			branchFound.name = name;
 		}
 
-		const updateResult = await this.branchRepository.update(
-			{ id },
-			updateBranchDto,
-		);
+		// Actualización de campos
+		Object.assign(branchFound, rest);
 
-		return updateResult;
-	}
+		const updateBranch = await this.branchRepository.save(branchFound);
 
-	/**
-	 * Elimina una sede de la base de datos por su ID.
-	 *
-	 * @param id - ID de la sede a eliminar.
-	 * @returns Una promesa con el resultado de la eliminación.
-	 * @throws {NotFoundException} Si la sede no existe.
-	 */
-	public async remove(id: string): Promise<DeleteResult> {
-		const branchFound = await this.branchRepository.findOne({
-			where: {
-				id,
-			},
-		});
-		if (!branchFound) {
-			throw new NotFoundException({ messageKey: "branches.not_found" });
-		}
-
-		return this.branchRepository.delete({ id });
+		return updateBranch;
 	}
 }
