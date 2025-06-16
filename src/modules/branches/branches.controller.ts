@@ -11,7 +11,7 @@ import {
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { SuccessMessageKey } from "src/common/decorators/success-message.decorator";
-import { DeleteResult, UpdateResult } from "typeorm";
+import { DeleteResult } from "typeorm";
 import { BranchesService } from "./branches.service";
 import { CreateBranchDto, UpdateBranchDto } from "./dto/branch.dto";
 import { Branch } from "./entities/branch.entity";
@@ -121,7 +121,7 @@ export class BranchesController {
 	public update(
 		@Param("id", ParseUUIDPipe) id: string,
 		@Body() updateBranchDto: UpdateBranchDto,
-	): Promise<UpdateResult> {
+	): Promise<Branch> {
 		return this.branchService.update(id, updateBranchDto);
 	}
 

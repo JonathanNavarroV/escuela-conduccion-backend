@@ -7,7 +7,7 @@ import {
 import { InjectRepository } from "@nestjs/typeorm";
 import * as bcrypt from "bcrypt";
 import { plainToInstance } from "class-transformer";
-import { DeleteResult, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { BranchesService } from "../branches/branches.service";
 import { Branch } from "../branches/entities/branch.entity";
 import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
@@ -124,6 +124,7 @@ export class UsersService {
 	 *
 	 * @param id - ID del usuario (UUID).
 	 * @returns Una promesa que resuelve con el usuario sin la contraseña.
+	 *
 	 * @throws {NotFoundException} Si no se encuentra un usuario con el ID proporcionado.
 	 */
 	public async findOneById(id: string): Promise<User> {
@@ -229,28 +230,8 @@ export class UsersService {
 			userFound.branches = branches;
 		}
 
-		const savedUser = await this.userRepository.save(userFound);
+		const updatedUser = await this.userRepository.save(userFound);
 
-		return plainToInstance(User, savedUser);
-	}
-
-	/**
-	 * Elimina un usuario de la base de datos por su ID.
-	 *
-	 * @param id - ID del usuario a eliminar.
-	 * @returns Una promesa con el resultado de la eliminación.
-	 * @throws {NotFoundException} Si el usuario no existe.
-	 */
-	public async remove(id: string): Promise<DeleteResult> {
-		const userFound = await this.userRepository.findOne({
-			where: {
-				id,
-			},
-		});
-		if (!userFound) {
-			throw new NotFoundException({ messageKey: "users.not_found" });
-		}
-
-		return this.userRepository.delete({ id });
+		return plainToInstance(User, updatedUser);
 	}
 }
