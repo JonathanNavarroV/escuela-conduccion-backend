@@ -1,5 +1,11 @@
 import { ApiProperty, PartialType } from "@nestjs/swagger";
-import { IsEmail, IsNotEmpty, IsString } from "class-validator";
+import {
+	IsBoolean,
+	IsEmail,
+	IsNotEmpty,
+	IsOptional,
+	IsString,
+} from "class-validator";
 
 export class CreateBranchDto {
 	@IsString()
@@ -59,4 +65,12 @@ export class CreateBranchDto {
 	public city: string;
 }
 
-export class UpdateBranchDto extends PartialType(CreateBranchDto) {}
+export class UpdateBranchDto extends PartialType(CreateBranchDto) {
+	@IsBoolean()
+	@IsOptional()
+	@ApiProperty({
+		description: "Indica si la sede está activa o no.",
+		example: true,
+	})
+	public isActive: boolean;
+}

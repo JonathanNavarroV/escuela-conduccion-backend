@@ -1,7 +1,6 @@
 import {
 	Body,
 	Controller,
-	Delete,
 	Get,
 	Param,
 	ParseUUIDPipe,
@@ -11,7 +10,6 @@ import {
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { SuccessMessageKey } from "src/common/decorators/success-message.decorator";
-import { DeleteResult } from "typeorm";
 import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
 import { User, UserRole } from "./entities/user.entity";
 import { UsersService } from "./users.service";
@@ -143,21 +141,41 @@ export class UsersController {
 		return this.userService.update(id, updateUserDto);
 	}
 
-	@Delete(":id")
+	@Patch(":id/activate")
 	@ApiOperation({
-		summary: "Eliminar usuario",
-		description: "Elimina un usuario del sistema por su ID.",
+		summary: "Activar usuario.",
+		description:
+			"Activa un usuario estableciendo su propiedad isActive en true.",
 	})
 	@ApiResponse({
 		status: 200,
-		description: "Usuario eliminado correctamente.",
+		description: "Usuario activado correctamente.",
 	})
 	@ApiResponse({
 		status: 404,
 		description: "Usuario no encontrado.",
 	})
-	@SuccessMessageKey("user.deleted")
-	public remove(@Param("id", ParseUUIDPipe) id: string): Promise<DeleteResult> {
-		return this.userService.remove(id);
+	@SuccessMessageKey("user.activated")
+	public activate(@Param("id", ParseUUIDPipe) id: string): Promise<User> {
+		return this.userService.update(id, { isActive: true });
+	}
+
+	@Patch(":id/deactivate")
+	@ApiOperation({
+		summary: "Desactivar usuario.",
+		description:
+			"Desactiva un usuario estableciendo su propiedad isActive en false.",
+	})
+	@ApiResponse({
+		status: 200,
+		description: "Usuario desactivado correctamente.",
+	})
+	@ApiResponse({
+		status: 404,
+		description: "Usuario no encontrado.",
+	})
+	@SuccessMessageKey("user.deactivated")
+	public deactivate(@Param("id", ParseUUIDPipe) id: string): Promise<User> {
+		return this.userService.update(id, { isActive: false });
 	}
 }

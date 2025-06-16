@@ -1,7 +1,6 @@
 import {
 	Body,
 	Controller,
-	Delete,
 	Get,
 	Param,
 	ParseUUIDPipe,
@@ -11,7 +10,6 @@ import {
 } from "@nestjs/common";
 import { ApiBearerAuth, ApiOperation, ApiResponse } from "@nestjs/swagger";
 import { SuccessMessageKey } from "src/common/decorators/success-message.decorator";
-import { DeleteResult } from "typeorm";
 import { BranchesService } from "./branches.service";
 import { CreateBranchDto, UpdateBranchDto } from "./dto/branch.dto";
 import { Branch } from "./entities/branch.entity";
@@ -125,21 +123,40 @@ export class BranchesController {
 		return this.branchService.update(id, updateBranchDto);
 	}
 
-	@Delete(":id")
+	@Patch(":id/activate")
 	@ApiOperation({
-		summary: "Eliminar sede",
-		description: "Elimina una sede del sistema por su ID.",
+		summary: "Activar sede.",
+		description: "Activa una sede estableciendo su propiedad isActive en true.",
 	})
 	@ApiResponse({
 		status: 200,
-		description: "Sede eliminada correctamente.",
+		description: "Sede activada correctamente.",
 	})
 	@ApiResponse({
 		status: 404,
 		description: "Sede no encontrada.",
 	})
-	@SuccessMessageKey("branch.deleted")
-	public remove(@Param("id", ParseUUIDPipe) id: string): Promise<DeleteResult> {
-		return this.branchService.remove(id);
+	@SuccessMessageKey("branch.activated")
+	public activate(@Param("id", ParseUUIDPipe) id: string): Promise<Branch> {
+		return this.branchService.update(id, { isActive: true });
+	}
+
+	@Patch(":id/deactivate")
+	@ApiOperation({
+		summary: "Desactivar sede.",
+		description:
+			"Desactiva una sede estableciendo su propiedad isActive en false.",
+	})
+	@ApiResponse({
+		status: 200,
+		description: "Sede desactivada correctamente.",
+	})
+	@ApiResponse({
+		status: 404,
+		description: "Sede no encontrada.",
+	})
+	@SuccessMessageKey("branch.deactivated")
+	public deactivate(@Param("id", ParseUUIDPipe) id: string): Promise<Branch> {
+		return this.branchService.update(id, { isActive: false });
 	}
 }

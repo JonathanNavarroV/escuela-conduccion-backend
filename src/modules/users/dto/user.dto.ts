@@ -1,9 +1,11 @@
 import { ApiProperty, OmitType, PartialType } from "@nestjs/swagger";
 import {
 	IsArray,
+	IsBoolean,
 	IsEmail,
 	IsEnum,
 	IsNotEmpty,
+	IsOptional,
 	IsString,
 	IsUrl,
 	IsUUID,
@@ -80,4 +82,12 @@ export class CreateUserDto {
 // PartialType permite que las propiedades sean opcionales
 export class UpdateUserDto extends PartialType(
 	OmitType(CreateUserDto, ["role"] as const),
-) {}
+) {
+	@IsBoolean()
+	@IsOptional()
+	@ApiProperty({
+		description: "Indica si el usuario está activo o no.",
+		example: true,
+	})
+	public isActive: boolean;
+}
