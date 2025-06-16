@@ -39,19 +39,24 @@ export class BranchesService {
 	}
 
 	/**
-	 * Retorna todas las sedes registradas en la base de datos.
-	 * Las sedes se retornan como instancias de UserEntity.
+	 * Retorna todas las sedes registradas en la base de datos, ordenadas por `isActive` (activos primero, luego inactivos).
 	 *
 	 * @returns Una promesa que resuelve con un arreglo de todas las sedes.
 	 */
 	public async findAll(): Promise<Branch[]> {
-		const branches = await this.branchRepository.find();
+		const branches = await this.branchRepository.find({
+			order: {
+				isActive: "DESC",
+			},
+		});
 
 		return branches;
 	}
 
 	/**
-	 * Busca sedes cuyo nombre contiene el término de búsqueda, ignorando mayúscula, minúsculo y tildes
+	 * Busca sedes cuyo nombre contiene el término de búsqueda,
+	 * ignorando mayúsculas, minúsculas y tildes.
+	 * Ordena primero por `isActive = true`, luego por nombre.
 	 *
 	 * @param searchTerm - Texto parcial para buscar el nombre.
 	 * @returns Una promesa que resuelve con un arreglo de sedes que coinciden.
@@ -62,6 +67,8 @@ export class BranchesService {
 			.where(`branch.name COLLATE Latin1_General_CI_AI LIKE :searchTerm`, {
 				searchTerm: `%${searchTerm}%`,
 			})
+			.orderBy("branch.isActive", "DESC")
+			.addOrderBy("branch.name", "ASC")
 			.getMany();
 
 		return branchFound;

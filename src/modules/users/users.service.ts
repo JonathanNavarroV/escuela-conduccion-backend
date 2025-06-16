@@ -95,7 +95,11 @@ export class UsersService {
 	 * @returns Una promesa que resuelve con un arreglo de todos los usuarios sin la contraseña.
 	 */
 	public async findAll(): Promise<User[]> {
-		const users = await this.userRepository.find();
+		const users = await this.userRepository.find({
+			order: {
+				isActive: "DESC",
+			},
+		});
 
 		return plainToInstance(User, users);
 	}
@@ -113,6 +117,8 @@ export class UsersService {
 				`CONCAT(user.firstName, ' ', user.lastNameFather, ' ', user.lastNameMother) COLLATE Latin1_General_CI_AI LIKE :searchTerm`,
 				{ searchTerm: `%${searchTerm}%` },
 			)
+			.orderBy("user.isActive", "DESC")
+			.addOrderBy("user.name", "ASC")
 			.getMany();
 
 		return plainToInstance(User, usersFound);
