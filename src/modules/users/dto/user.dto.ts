@@ -56,6 +56,7 @@ export class CreateUserDto {
 	public password: string;
 
 	@IsUrl()
+	@IsOptional()
 	@ApiProperty({
 		description: "URL de la foto de perfil.",
 		example: "https://ejemplo.com/juan.jpg",
