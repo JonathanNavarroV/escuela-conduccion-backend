@@ -2,7 +2,7 @@ import { User } from "src/modules/users/entities/user.entity";
 import { Column, Entity, ManyToMany, PrimaryColumn } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
 
-@Entity()
+@Entity("branches")
 export class Branch {
 	@PrimaryColumn("uuid")
 	public id: string = uuidv4();

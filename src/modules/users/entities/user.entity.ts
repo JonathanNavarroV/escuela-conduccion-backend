@@ -8,7 +8,7 @@ export enum UserRole {
 	BRANCH_ADMIN = "branch_admin",
 }
 
-@Entity()
+@Entity("users")
 export class User {
 	@PrimaryColumn("uuid")
 	public id: string = uuidv4();
