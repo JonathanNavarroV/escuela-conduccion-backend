@@ -1,0 +1,52 @@
+import { Controller, Get, Param, ParseUUIDPipe } from "@nestjs/common";
+import { ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
+import { SuccessMessageKey } from "src/common/decorators/success-message.decorator";
+import { City } from "./entities/city.entity";
+import { District } from "./entities/district.entity";
+import { LocationsService } from "./locations.service";
+
+@Controller("locations")
+export class LocationsController {
+	public constructor(private readonly locationService: LocationsService) {}
+
+	@Get("cities")
+	@ApiOperation({
+		summary: "Obtener todas las ciudades del país de la escuela.",
+		description:
+			"Retorna una lista con todas las ciudades del país de la escuela",
+	})
+	@ApiResponse({
+		status: 200,
+		description: "Listado de ciudades obtenido correctamente.",
+		type: City,
+		isArray: true,
+	})
+	@SuccessMessageKey("common.success")
+	public findAllCities(): Promise<City[]> {
+		return this.locationService.findAllCities();
+	}
+
+	@Get("cities/:cityId/districts")
+	@ApiOperation({
+		summary: "Obtener distritos por ciudad",
+		description:
+			"Retorna una lista con todos los distritos asociados a una ciudad específica.",
+	})
+	@ApiParam({
+		name: "cityId",
+		description: "ID de la ciudad (UUID)",
+		example: "75481FC4-FF0B-4437-B598-E0050F377BF9",
+	})
+	@ApiResponse({
+		status: 200,
+		description: "Listado de distritos obtenido correctamente.",
+		type: District,
+		isArray: true,
+	})
+	@SuccessMessageKey("common.success")
+	public findDistrictsByCityId(
+		@Param("cityId", ParseUUIDPipe) cityId: string,
+	): Promise<District[]> {
+		return this.locationService.findDistrictsByCityId(cityId);
+	}
+}

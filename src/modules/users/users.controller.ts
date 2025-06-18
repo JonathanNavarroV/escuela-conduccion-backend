@@ -8,7 +8,12 @@ import {
 	Post,
 	Query,
 } from "@nestjs/common";
-import { ApiBearerAuth, ApiOperation, ApiResponse } from "@nestjs/swagger";
+import {
+	ApiBearerAuth,
+	ApiOperation,
+	ApiParam,
+	ApiResponse,
+} from "@nestjs/swagger";
 import { SuccessMessageKey } from "src/common/decorators/success-message.decorator";
 import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
 import { User, UserRole } from "./entities/user.entity";
@@ -101,6 +106,11 @@ export class UsersController {
 		summary: "Obtener usuario por ID",
 		description: "Buscar y retorna un usuario según su ID (UUID).",
 	})
+	@ApiParam({
+		name: "id",
+		description: "ID del usuario (UUID)",
+		example: "7FC8EBDE-9C9A-4966-8D91-573F53CB68BC",
+	})
 	@ApiResponse({
 		status: 200,
 		description: "Usuario encontrado.",
@@ -120,6 +130,11 @@ export class UsersController {
 		summary: "Actualizar usuario",
 		description:
 			"Actualiza la información de un usuario por su ID. Verifica que el email no esté en uso.",
+	})
+	@ApiParam({
+		name: "id",
+		description: "ID del usuario (UUID)",
+		example: "7FC8EBDE-9C9A-4966-8D91-573F53CB68BC",
 	})
 	@ApiResponse({
 		status: 200,
@@ -147,6 +162,11 @@ export class UsersController {
 		description:
 			"Activa un usuario estableciendo su propiedad isActive en true.",
 	})
+	@ApiParam({
+		name: "id",
+		description: "ID del usuario (UUID)",
+		example: "7FC8EBDE-9C9A-4966-8D91-573F53CB68BC",
+	})
 	@ApiResponse({
 		status: 200,
 		description: "Usuario activado correctamente.",
@@ -165,6 +185,11 @@ export class UsersController {
 		summary: "Desactivar usuario.",
 		description:
 			"Desactiva un usuario estableciendo su propiedad isActive en false.",
+	})
+	@ApiParam({
+		name: "id",
+		description: "ID del usuario (UUID)",
+		example: "7FC8EBDE-9C9A-4966-8D91-573F53CB68BC",
 	})
 	@ApiResponse({
 		status: 200,

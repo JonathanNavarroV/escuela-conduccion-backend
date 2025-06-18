@@ -8,7 +8,12 @@ import {
 	Post,
 	Query,
 } from "@nestjs/common";
-import { ApiBearerAuth, ApiOperation, ApiResponse } from "@nestjs/swagger";
+import {
+	ApiBearerAuth,
+	ApiOperation,
+	ApiParam,
+	ApiResponse,
+} from "@nestjs/swagger";
 import { SuccessMessageKey } from "src/common/decorators/success-message.decorator";
 import { BranchesService } from "./branches.service";
 import { CreateBranchDto, UpdateBranchDto } from "./dto/branch.dto";
@@ -83,6 +88,11 @@ export class BranchesController {
 		summary: "Obtener sede por ID",
 		description: "Buscar y retorna una sede según su ID (UUID).",
 	})
+	@ApiParam({
+		name: "id",
+		description: "ID de la sede (UUID)",
+		example: "44A7E21A-4870-4DAF-8DAD-EF73B8593274",
+	})
 	@ApiResponse({
 		status: 200,
 		description: "Sede encontrada.",
@@ -102,6 +112,11 @@ export class BranchesController {
 		summary: "Actualizar sede",
 		description:
 			"Actualiza la información de una sede por su ID. Verifica que el nombre no esté en uso.",
+	})
+	@ApiParam({
+		name: "id",
+		description: "ID de la sede (UUID)",
+		example: "44A7E21A-4870-4DAF-8DAD-EF73B8593274",
 	})
 	@ApiResponse({
 		status: 200,
@@ -128,6 +143,11 @@ export class BranchesController {
 		summary: "Activar sede.",
 		description: "Activa una sede estableciendo su propiedad isActive en true.",
 	})
+	@ApiParam({
+		name: "id",
+		description: "ID de la sede (UUID)",
+		example: "44A7E21A-4870-4DAF-8DAD-EF73B8593274",
+	})
 	@ApiResponse({
 		status: 200,
 		description: "Sede activada correctamente.",
@@ -146,6 +166,11 @@ export class BranchesController {
 		summary: "Desactivar sede.",
 		description:
 			"Desactiva una sede estableciendo su propiedad isActive en false.",
+	})
+	@ApiParam({
+		name: "id",
+		description: "ID de la sede (UUID)",
+		example: "44A7E21A-4870-4DAF-8DAD-EF73B8593274",
 	})
 	@ApiResponse({
 		status: 200,

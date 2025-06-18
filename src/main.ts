@@ -9,7 +9,7 @@ async function bootstrap() {
 
 	app.enableCors({
 		origin: process.env.FRONTEND_URL,
-		methods: "GET,PATCH,POST,DELETE",
+		methods: "GET,PATCH,POST",
 		credentials: true, // Permite el envío de credenciales mediante la cabecera
 	});
 
