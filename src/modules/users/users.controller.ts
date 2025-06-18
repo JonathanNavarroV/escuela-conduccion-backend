@@ -14,6 +14,7 @@ import {
 	ApiParam,
 	ApiResponse,
 } from "@nestjs/swagger";
+import { MessageKeys } from "src/common/constants/message-keys.constant";
 import { SuccessMessageKey } from "src/common/decorators/success-message.decorator";
 import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
 import { User, UserRole } from "./entities/user.entity";
@@ -40,7 +41,7 @@ export class UsersController {
 		status: 409,
 		description: "Ya existe un usuario con ese correo electrónico.",
 	})
-	@SuccessMessageKey("user.created")
+	@SuccessMessageKey(MessageKeys.USER.CREATED)
 	public create(@Body() createUserDto: CreateUserDto): Promise<User> {
 		return this.userService.create(createUserDto);
 	}
@@ -57,7 +58,7 @@ export class UsersController {
 		type: String,
 		isArray: true,
 	})
-	@SuccessMessageKey("common.success")
+	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
 	public findAllRoles(): Array<any> {
 		return Object.values(UserRole);
 	}
@@ -74,7 +75,7 @@ export class UsersController {
 		type: User,
 		isArray: true,
 	})
-	@SuccessMessageKey("common.success")
+	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
 	public findAll(): Promise<User[]> {
 		return this.userService.findAll();
 	}
@@ -94,7 +95,7 @@ export class UsersController {
 		status: 404,
 		description: "No se encontraron usuarios que coincidan con la búsqueda.",
 	})
-	@SuccessMessageKey("common.success")
+	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
 	public searchByFullName(
 		@Query("searchTerm") searchTerm: string,
 	): Promise<User[]> {
@@ -120,7 +121,7 @@ export class UsersController {
 		status: 404,
 		description: "No se encontró un usuario con el ID proporcionado.",
 	})
-	@SuccessMessageKey("common.success")
+	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
 	public findOneById(@Param("id", ParseUUIDPipe) id: string): Promise<User> {
 		return this.userService.findOneById(id);
 	}
@@ -148,7 +149,7 @@ export class UsersController {
 		status: 409,
 		description: "Ya existe un usuario con ese correo electrónico.",
 	})
-	@SuccessMessageKey("user.updated")
+	@SuccessMessageKey(MessageKeys.USER.UPDATED)
 	public update(
 		@Param("id", ParseUUIDPipe) id: string,
 		@Body() updateUserDto: UpdateUserDto,
@@ -175,7 +176,7 @@ export class UsersController {
 		status: 404,
 		description: "Usuario no encontrado.",
 	})
-	@SuccessMessageKey("user.activated")
+	@SuccessMessageKey(MessageKeys.USER.ACTIVATED)
 	public activate(@Param("id", ParseUUIDPipe) id: string): Promise<User> {
 		return this.userService.update(id, { isActive: true });
 	}
@@ -199,7 +200,7 @@ export class UsersController {
 		status: 404,
 		description: "Usuario no encontrado.",
 	})
-	@SuccessMessageKey("user.deactivated")
+	@SuccessMessageKey(MessageKeys.USER.DEACTIVATED)
 	public deactivate(@Param("id", ParseUUIDPipe) id: string): Promise<User> {
 		return this.userService.update(id, { isActive: false });
 	}

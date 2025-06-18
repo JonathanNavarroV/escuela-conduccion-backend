@@ -4,6 +4,7 @@ import {
 	NotFoundException,
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { MessageKeys } from "src/common/constants/message-keys.constant";
 import { Repository } from "typeorm";
 import { CreateBranchDto, UpdateBranchDto } from "./dto/branch.dto";
 import { Branch } from "./entities/branch.entity";
@@ -28,7 +29,7 @@ export class BranchesService {
 		const branchFound = await this.findOneByName(createBranchDto.name);
 		if (!!branchFound) {
 			throw new ConflictException({
-				messageKey: "branches.already_exist",
+				messageKey: MessageKeys.BRANCH.ALREADY_EXIST,
 			});
 		}
 
@@ -90,7 +91,7 @@ export class BranchesService {
 			},
 		});
 		if (!branchFound) {
-			throw new NotFoundException({ messageKey: "branches.not_found" });
+			throw new NotFoundException({ messageKey: MessageKeys.BRANCH.NOT_FOUND });
 		}
 
 		return branchFound;
@@ -136,14 +137,16 @@ export class BranchesService {
 			},
 		});
 		if (!branchFound) {
-			throw new NotFoundException({ messageKey: "branches.not_found" });
+			throw new NotFoundException({ messageKey: MessageKeys.BRANCH.NOT_FOUND });
 		}
 
 		// Validar si el nuevo nombre ya está en uso por otra sede
 		if (name && branchFound.name !== name) {
 			const branchNameFound = await this.findOneByName(updateBranchDto.name);
 			if (!!branchNameFound) {
-				throw new ConflictException({ messageKey: "branches.already_exists" });
+				throw new ConflictException({
+					messageKey: MessageKeys.BRANCH.ALREADY_EXIST,
+				});
 			}
 
 			branchFound.name = name;

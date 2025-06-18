@@ -1,5 +1,6 @@
 import { Controller, Get, Param, ParseUUIDPipe } from "@nestjs/common";
 import { ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
+import { MessageKeys } from "src/common/constants/message-keys.constant";
 import { SuccessMessageKey } from "src/common/decorators/success-message.decorator";
 import { City } from "./entities/city.entity";
 import { District } from "./entities/district.entity";
@@ -21,7 +22,7 @@ export class LocationsController {
 		type: City,
 		isArray: true,
 	})
-	@SuccessMessageKey("common.success")
+	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
 	public findAllCities(): Promise<City[]> {
 		return this.locationService.findAllCities();
 	}
@@ -43,7 +44,7 @@ export class LocationsController {
 		type: District,
 		isArray: true,
 	})
-	@SuccessMessageKey("common.success")
+	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
 	public findDistrictsByCityId(
 		@Param("cityId", ParseUUIDPipe) cityId: string,
 	): Promise<District[]> {

@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
+import { MessageKeys } from "src/common/constants/message-keys.constant";
 import { UsersService } from "../users/users.service";
 
 @Injectable()
@@ -26,14 +27,14 @@ export class AuthService {
 		const user = await this.userService.findOneByEmail(email);
 		if (!user) {
 			throw new UnauthorizedException({
-				messageKey: "auth.invalid_credentials",
+				messageKey: MessageKeys.AUTH.INVALID_CREDENTIALS,
 			});
 		}
 
 		const isMatch = await bcrypt.compare(password, user.password);
 		if (!isMatch) {
 			throw new UnauthorizedException({
-				messageKey: "auth.invalid_credentials",
+				messageKey: MessageKeys.AUTH.INVALID_CREDENTIALS,
 			});
 		}
 

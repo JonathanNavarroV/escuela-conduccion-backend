@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from "@nestjs/typeorm";
 import * as bcrypt from "bcrypt";
 import { plainToInstance } from "class-transformer";
+import { MessageKeys } from "src/common/constants/message-keys.constant";
 import { Repository } from "typeorm";
 import { BranchesService } from "../branches/branches.service";
 import { Branch } from "../branches/entities/branch.entity";
@@ -47,7 +48,7 @@ export class UsersService {
 		const userFound = await this.findOneByEmail(email);
 		if (!!userFound) {
 			throw new ConflictException({
-				messageKey: "users.already_exists",
+				messageKey: MessageKeys.USER.ALREADY_EXIST,
 			});
 		}
 
@@ -57,13 +58,13 @@ export class UsersService {
 		if (role === UserRole.SUPER_ADMIN) {
 			if (branchIds?.length) {
 				throw new BadRequestException({
-					messageKey: "users.super_admin_should_not_have_branches",
+					messageKey: MessageKeys.USER.SUPER_ADMIN_SHOULD_NOT_HAVE_BRANCHES,
 				});
 			}
 		} else if (role === UserRole.BRANCH_ADMIN) {
 			if (!branchIds?.length) {
 				throw new BadRequestException({
-					messageKey: "users.branch_admin_requires_branches",
+					messageKey: MessageKeys.USER.BRANCH_ADMIN_REQUIRES_BRANCHES,
 				});
 			}
 
@@ -140,7 +141,7 @@ export class UsersService {
 			},
 		});
 		if (!userFound) {
-			throw new NotFoundException({ messageKey: "users.not_found" });
+			throw new NotFoundException({ messageKey: MessageKeys.USER.NOT_FOUND });
 		}
 
 		return plainToInstance(User, userFound);
@@ -189,14 +190,16 @@ export class UsersService {
 			},
 		});
 		if (!userFound) {
-			throw new NotFoundException({ messageKey: "users.not_found" });
+			throw new NotFoundException({ messageKey: MessageKeys.USER.NOT_FOUND });
 		}
 
 		// Validación de email en uso
 		if (email && userFound.email !== email) {
 			const userEmailFound = await this.findOneByEmail(email);
 			if (!!userEmailFound) {
-				throw new ConflictException({ messageKey: "users.already_exists" });
+				throw new ConflictException({
+					messageKey: MessageKeys.USER.ALREADY_EXIST,
+				});
 			}
 
 			userFound.email = email;
@@ -209,13 +212,13 @@ export class UsersService {
 		if (!!branchIds) {
 			if (currentRole === UserRole.BRANCH_ADMIN && branchIds.length === 0) {
 				throw new BadRequestException({
-					messageKey: "users.branch_admin_requires_branches",
+					messageKey: MessageKeys.USER.BRANCH_ADMIN_REQUIRES_BRANCHES,
 				});
 			}
 
 			if (currentRole === UserRole.SUPER_ADMIN && branchIds.length > 0) {
 				throw new BadRequestException({
-					messageKey: "users.super_admin_should_not_have_branches",
+					messageKey: MessageKeys.USER.SUPER_ADMIN_SHOULD_NOT_HAVE_BRANCHES,
 				});
 			}
 

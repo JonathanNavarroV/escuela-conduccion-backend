@@ -14,6 +14,7 @@ import {
 	ApiParam,
 	ApiResponse,
 } from "@nestjs/swagger";
+import { MessageKeys } from "src/common/constants/message-keys.constant";
 import { SuccessMessageKey } from "src/common/decorators/success-message.decorator";
 import { BranchesService } from "./branches.service";
 import { CreateBranchDto, UpdateBranchDto } from "./dto/branch.dto";
@@ -39,7 +40,7 @@ export class BranchesController {
 		status: 409,
 		description: "Ya existe una sede con ese nombre.",
 	})
-	@SuccessMessageKey("branch.created")
+	@SuccessMessageKey(MessageKeys.BRANCH.CREATED)
 	public create(@Body() createBranchDto: CreateBranchDto): Promise<Branch> {
 		return this.branchService.create(createBranchDto);
 	}
@@ -56,7 +57,7 @@ export class BranchesController {
 		type: Branch,
 		isArray: true,
 	})
-	@SuccessMessageKey("common.success")
+	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
 	public findAll(): Promise<Branch[]> {
 		return this.branchService.findAll();
 	}
@@ -76,7 +77,7 @@ export class BranchesController {
 		status: 402,
 		description: "No se encontraron sedes que coincidan con la búsqueda.",
 	})
-	@SuccessMessageKey("common.success")
+	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
 	public searchByName(
 		@Query("searchTerm") searchTerm: string,
 	): Promise<Branch[]> {
@@ -102,7 +103,7 @@ export class BranchesController {
 		status: 404,
 		description: "No se encontró una sede con el ID proporcionado.",
 	})
-	@SuccessMessageKey("common.success")
+	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
 	public findOneById(@Param("id", ParseUUIDPipe) id: string): Promise<Branch> {
 		return this.branchService.findOneById(id);
 	}
@@ -130,7 +131,7 @@ export class BranchesController {
 		status: 409,
 		description: "Ya existe una sede con ese nombre.",
 	})
-	@SuccessMessageKey("branch.updated")
+	@SuccessMessageKey(MessageKeys.BRANCH.UPDATED)
 	public update(
 		@Param("id", ParseUUIDPipe) id: string,
 		@Body() updateBranchDto: UpdateBranchDto,
@@ -156,7 +157,7 @@ export class BranchesController {
 		status: 404,
 		description: "Sede no encontrada.",
 	})
-	@SuccessMessageKey("branch.activated")
+	@SuccessMessageKey(MessageKeys.BRANCH.ACTIVATED)
 	public activate(@Param("id", ParseUUIDPipe) id: string): Promise<Branch> {
 		return this.branchService.update(id, { isActive: true });
 	}
@@ -180,7 +181,7 @@ export class BranchesController {
 		status: 404,
 		description: "Sede no encontrada.",
 	})
-	@SuccessMessageKey("branch.deactivated")
+	@SuccessMessageKey(MessageKeys.BRANCH.DEACTIVATED)
 	public deactivate(@Param("id", ParseUUIDPipe) id: string): Promise<Branch> {
 		return this.branchService.update(id, { isActive: false });
 	}

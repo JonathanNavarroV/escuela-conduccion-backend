@@ -7,6 +7,7 @@ import {
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { Request } from "express";
+import { MessageKeys } from "src/common/constants/message-keys.constant";
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -31,7 +32,9 @@ export class AuthGuard implements CanActivate {
 		// Se extrae el token de la cabecera de autorización
 		const token = this.extractTokenFromHeader(request);
 		if (!token) {
-			throw new UnauthorizedException({ messageKey: "auth.unauthorized" });
+			throw new UnauthorizedException({
+				messageKey: MessageKeys.AUTH.UNAUTHORIZED,
+			});
 		}
 
 		try {
@@ -40,7 +43,9 @@ export class AuthGuard implements CanActivate {
 			});
 			request["user"] = payload;
 		} catch {
-			throw new UnauthorizedException({ messageKey: "auth.unauthorized" });
+			throw new UnauthorizedException({
+				messageKey: MessageKeys.AUTH.UNAUTHORIZED,
+			});
 		}
 
 		return true;
