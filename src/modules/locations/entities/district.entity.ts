@@ -7,7 +7,7 @@ export class District {
 	@PrimaryColumn("uuid")
 	public id: string = uuidv4();
 
-	@Column()
+	@Column({ type: "varchar", length: 50 })
 	public name: string;
 
 	@ManyToOne(() => Province, (province) => province.districts, {
@@ -16,6 +16,6 @@ export class District {
 	@JoinColumn({ name: "provinceId" })
 	public province: Province;
 
-	@Column()
+	@Column({ type: "uniqueidentifier" })
 	public provinceId: string;
 }

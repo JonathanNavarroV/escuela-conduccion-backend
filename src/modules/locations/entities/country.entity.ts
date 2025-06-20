@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryColumn } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
+import { LocationLevel } from "./location-level.entity";
 import { Province } from "./province.entity";
 import { Region } from "./region.entity";
 
@@ -8,8 +9,11 @@ export class Country {
 	@PrimaryColumn("uuid")
 	public id: string = uuidv4();
 
-	@Column({ unique: true })
+	@Column({ unique: true, type: "varchar", length: 50 })
 	public name: string;
+
+	@OneToMany(() => LocationLevel, (locationLevel) => locationLevel.country)
+	public locationLevel: LocationLevel[];
 
 	@OneToMany(() => Region, (region) => region.country)
 	public regions: Region[];

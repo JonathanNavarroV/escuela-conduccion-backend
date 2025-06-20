@@ -16,21 +16,21 @@ export class Province {
 	@PrimaryColumn("uuid")
 	public id: string = uuidv4();
 
-	@Column()
+	@Column({ type: "varchar", length: 50 })
 	public name: string;
 
 	@ManyToOne(() => Country, (country) => country.provinces, { nullable: false })
 	@JoinColumn({ name: "countryId" })
 	public country: Country;
 
-	@Column()
+	@Column({ type: "uniqueidentifier" })
 	public countryId;
 
 	@ManyToOne(() => Region, (region) => region.provinces, { nullable: true })
 	@JoinColumn({ name: "regionId" })
 	public region: Region;
 
-	@Column({ nullable: true })
+	@Column({ nullable: true, type: "uniqueidentifier" })
 	public regionId: string;
 
 	@OneToMany(() => District, (district) => district.province)

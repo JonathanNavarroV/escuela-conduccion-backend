@@ -15,14 +15,14 @@ export class Region {
 	@PrimaryColumn("uuid")
 	public id: string = uuidv4();
 
-	@Column()
+	@Column({ type: "varchar", length: 50 })
 	public name: string;
 
 	@ManyToOne(() => Country, (country) => country.regions, { nullable: false })
 	@JoinColumn({ name: "countryId" })
 	public country: Country;
 
-	@Column()
+	@Column({ type: "uniqueidentifier" })
 	public countryId: string;
 
 	@OneToMany(() => Province, (province) => province.region)
