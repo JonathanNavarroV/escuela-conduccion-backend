@@ -1820,10 +1820,10 @@ export class SeedChileLocationsData1750382785512 implements MigrationInterface {
 	}
 
 	public async down(queryRunner: QueryRunner): Promise<void> {
-		await queryRunner.query(`DELETE FROM countries`);
-		await queryRunner.query(`DELETE FROM regions`);
-		await queryRunner.query(`DELETE FROM provinces`);
 		await queryRunner.query(`DELETE FROM districts`);
+		await queryRunner.query(`DELETE FROM provinces`);
+		await queryRunner.query(`DELETE FROM regions`);
+		await queryRunner.query(`DELETE FROM countries`);
 	}
 }
 
