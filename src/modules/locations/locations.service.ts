@@ -1,29 +1,32 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { City } from "./entities/city.entity";
 import { Country } from "./entities/country.entity";
 import { District } from "./entities/district.entity";
+import { Province } from "./entities/province.entity";
+import { Region } from "./entities/region.entity";
 
 @Injectable()
 export class LocationsService {
 	public constructor(
 		@InjectRepository(Country) private countryRepository: Repository<Country>,
-		@InjectRepository(City) private cityRepository: Repository<City>,
+		@InjectRepository(Region) private regionRepository: Repository<Region>,
+		@InjectRepository(Province)
+		private provinceRepository: Repository<Province>,
 		@InjectRepository(District)
 		private districtRepository: Repository<District>,
 	) {}
 
 	/**
-	 * Retorna todas las ciudades asociadas al país configurado en la variable de entorno `SCHOOL_COUNTRY`.
+	 * Retorna todas las regiones asociadas al país configurado en la variable de entorno `SCHOOL_COUNTRY`.
 	 *
 	 * - Busca el país por su nombre (`SCHOOL_COUNTRY`).
 	 * - Si no se encuentra el país, retorna un arreglo vacío.
-	 * - Si el país existe, retorna todas las ciudades relacionadas con él.
+	 * - Si el país existe, retorna todas las regiones relacionadas con él.
 	 *
-	 * @returns Una promesa que resuelve con un arreglo de objetos `City` asociados al país, o un arreglo vacío si el país no existe.
+	 * @returns Una promesa que resuelve con un arreglo de objetos `Region` asociados al país, o un arreglo vacío si el país no existe.
 	 */
-	public async findAllCities(): Promise<City[]> {
+	public async findAllRegions(): Promise<Region[]> {
 		const countryName = process.env.SCHOOL_COUNTRY;
 
 		const country = await this.findCountryByName(countryName);
@@ -32,35 +35,35 @@ export class LocationsService {
 			return [];
 		}
 
-		const citiesFound = await this.cityRepository.find({
+		const regionsFound = await this.regionRepository.find({
 			where: {
 				country,
 			},
 		});
 
-		return citiesFound;
+		return regionsFound;
 	}
 
-	/**
-	 * Retorna todos los distritos asociados a una ciudad específica.
-	 *
-	 * - Verifica la existencia de la ciudad.
-	 * - Busca todos los distritos relacionados a esa ciudad.
-	 *
-	 * @param cityId - ID de la ciudad (UUID) para la que se desean obtener los distritos.
-	 * @returns Una promesa que resuelve con un arreglo de objetos `District` pertenecientes a la ciudad.
-	 */
-	public async findDistrictsByCityId(cityId: string): Promise<District[]> {
-		const city = await this.findCityById(cityId);
+	// /**
+	//  * Retorna todos los distritos asociados a una ciudad específica.
+	//  *
+	//  * - Verifica la existencia de la ciudad.
+	//  * - Busca todos los distritos relacionados a esa ciudad.
+	//  *
+	//  * @param cityId - ID de la ciudad (UUID) para la que se desean obtener los distritos.
+	//  * @returns Una promesa que resuelve con un arreglo de objetos `District` pertenecientes a la ciudad.
+	//  */
+	// public async findDistrictsByCityId(cityId: string): Promise<District[]> {
+	// 	// const city = await this.findCityById(cityId);
 
-		const districtsFound = await this.districtRepository.find({
-			where: {
-				city,
-			},
-		});
+	// 	const districtsFound = await this.districtRepository.find({
+	// 		where: {
+	// 			city,
+	// 		},
+	// 	});
 
-		return districtsFound;
-	}
+	// 	return districtsFound;
+	// }
 
 	/**
 	 * Busca un país por su nombre.
@@ -82,19 +85,19 @@ export class LocationsService {
 		return countryFound;
 	}
 
-	/**
-	 * Busca una ciudad por su ID.
-	 *
-	 * @param cityId - ID de la ciudad (UUID) a buscar.
-	 * @returns Una promesa que resuelve con la ciudad encontrada, o `null` si no existe.
-	 */
-	private async findCityById(cityId: string): Promise<City> {
-		const cityFound = await this.cityRepository.findOne({
-			where: {
-				id: cityId,
-			},
-		});
+	// /**
+	//  * Busca una ciudad por su ID.
+	//  *
+	//  * @param cityId - ID de la ciudad (UUID) a buscar.
+	//  * @returns Una promesa que resuelve con la ciudad encontrada, o `null` si no existe.
+	//  */
+	// private async findCityById(cityId: string): Promise<City> {
+	// 	const cityFound = await this.cityRepository.findOne({
+	// 		where: {
+	// 			id: cityId,
+	// 		},
+	// 	});
 
-		return cityFound;
-	}
+	// 	return cityFound;
+	// }
 }

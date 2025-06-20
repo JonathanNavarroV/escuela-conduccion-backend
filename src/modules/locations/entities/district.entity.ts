@@ -1,6 +1,6 @@
-import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
-import { City } from "./city.entity";
+import { Province } from "./province.entity";
 
 @Entity("districts")
 export class District {
@@ -10,6 +10,12 @@ export class District {
 	@Column()
 	public name: string;
 
-	@ManyToOne(() => City, (city) => city.districts, { onDelete: "CASCADE" })
-	public city: City;
+	@ManyToOne(() => Province, (province) => province.districts, {
+		nullable: false,
+	})
+	@JoinColumn({ name: "provinceId" })
+	public province: Province;
+
+	@Column()
+	public provinceId: string;
 }
