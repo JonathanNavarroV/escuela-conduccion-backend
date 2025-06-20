@@ -479,7 +479,7 @@ const chileData = {
 			],
 		},
 		{
-			name: "Región del Libertador Gral. Bernardo O'Higgins",
+			name: "Libertador Gral. Bernardo O'Higgins",
 			region_number: "VI",
 			region_iso_3166_2: "CL-LI",
 			provincias: [
@@ -633,7 +633,7 @@ const chileData = {
 			],
 		},
 		{
-			name: "Región del Maule",
+			name: "Maule",
 			region_number: "VII",
 			region_iso_3166_2: "CL-ML",
 			provincias: [
@@ -780,7 +780,7 @@ const chileData = {
 			],
 		},
 		{
-			name: "Región de Ñuble",
+			name: "Ñuble",
 			region_number: "XVI",
 			region_iso_3166_2: "CL-NB",
 			provincias: [
@@ -886,7 +886,7 @@ const chileData = {
 			],
 		},
 		{
-			name: "Región del Biobío",
+			name: "Biobío",
 			region_number: "VIII",
 			region_iso_3166_2: "CL-BI",
 			provincias: [
@@ -1040,7 +1040,7 @@ const chileData = {
 			],
 		},
 		{
-			name: "Región de la Araucanía",
+			name: "La Araucanía",
 			region_number: "IX",
 			region_iso_3166_2: "CL-AR",
 			provincias: [
@@ -1185,7 +1185,7 @@ const chileData = {
 			],
 		},
 		{
-			name: "Región de los Ríos",
+			name: "Los Ríos",
 			region_number: "XIV",
 			region_iso_3166_2: "CL-LR",
 			provincias: [
@@ -1250,7 +1250,7 @@ const chileData = {
 			],
 		},
 		{
-			name: "Región de los Lagos",
+			name: "Los Lagos",
 			region_number: "X",
 			region_iso_3166_2: "CL-LL",
 			provincias: [
@@ -1397,7 +1397,7 @@ const chileData = {
 			],
 		},
 		{
-			name: "Región Aisén del Gral. Carlos Ibañez del Campo",
+			name: "Aisén del Gral. Carlos Ibañez del Campo",
 			region_number: "XI",
 			region_iso_3166_2: "CL-AI",
 			provincias: [
@@ -1464,7 +1464,7 @@ const chileData = {
 			],
 		},
 		{
-			name: "Región de Magallanes y de la Antártica Chilena",
+			name: "Magallanes y de la Antártica Chilena",
 			region_number: "XII",
 			region_iso_3166_2: "CL-MA",
 			provincias: [
@@ -1535,7 +1535,7 @@ const chileData = {
 			],
 		},
 		{
-			name: "Región Metropolitana de Santiago",
+			name: "Metropolitana de Santiago",
 			region_number: "XIII",
 			region_iso_3166_2: "CL-RM",
 			provincias: [
