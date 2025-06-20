@@ -39,31 +39,83 @@ export class LocationsService {
 			where: {
 				country,
 			},
+			order: {
+				name: "ASC",
+			},
 		});
 
 		return regionsFound;
 	}
 
-	// /**
-	//  * Retorna todos los distritos asociados a una ciudad específica.
-	//  *
-	//  * - Verifica la existencia de la ciudad.
-	//  * - Busca todos los distritos relacionados a esa ciudad.
-	//  *
-	//  * @param cityId - ID de la ciudad (UUID) para la que se desean obtener los distritos.
-	//  * @returns Una promesa que resuelve con un arreglo de objetos `District` pertenecientes a la ciudad.
-	//  */
-	// public async findDistrictsByCityId(cityId: string): Promise<District[]> {
-	// 	// const city = await this.findCityById(cityId);
+	/**
+	 * Retorna todas las las provincias asociadas al país configurado en la variable de entorno `SCHOOL_COUNTRY`.
+	 *
+	 * - Busca el país por su nombre (`SCHOOL_COUNTRY`).
+	 * - Si no se encuentra el país, retorna un arreglo vacío.
+	 * - Si el país existe, retorna todas las regiones relacionadas con él.
+	 *
+	 * @returns Una promesa que resuelve con un arreglo de objetos `Province` asociados al país, o un arreglo vacío si el país no existe.
+	 */
+	public async findAllProvinces(): Promise<Province[]> {
+		const countryName = process.env.SCHOOL_COUNTRY;
 
-	// 	const districtsFound = await this.districtRepository.find({
-	// 		where: {
-	// 			city,
-	// 		},
-	// 	});
+		const country = await this.findCountryByName(countryName);
 
-	// 	return districtsFound;
-	// }
+		if (!country) {
+			return [];
+		}
+
+		const provincesFound = await this.provinceRepository.find({
+			where: {
+				country,
+			},
+			order: {
+				name: "ASC",
+			},
+		});
+
+		return provincesFound;
+	}
+
+	/**
+	 * Retorna todos las provincias asociadas a una región específica.
+	 *
+	 * @param regionId - ID de la región (UUID) para la que se desean obtener las provincias.
+	 * @returns Una promesa que resuelve con un arreglo de objetos `Province` pertenecientes a la región.
+	 */
+	public async findProvincesByRegionId(regionId: string): Promise<Province[]> {
+		const provincesFound = await this.provinceRepository.find({
+			where: {
+				regionId,
+			},
+			order: {
+				name: "ASC",
+			},
+		});
+
+		return provincesFound;
+	}
+
+	/**
+	 * Retorna todos las comunas asociadas a una provincia específica.
+	 *
+	 * @param provinceId - ID de la provincia (UUID) para la que se desean obtener las comunas.
+	 * @returns Una promesa que resuelve con un arreglo de objetos `District` pertenecientes a la región.
+	 */
+	public async findDistrictsByProvinceId(
+		provinceId: string,
+	): Promise<District[]> {
+		const districtsFound = await this.districtRepository.find({
+			where: {
+				provinceId,
+			},
+			order: {
+				name: "ASC",
+			},
+		});
+
+		return districtsFound;
+	}
 
 	/**
 	 * Busca un país por su nombre.
@@ -84,20 +136,4 @@ export class LocationsService {
 
 		return countryFound;
 	}
-
-	// /**
-	//  * Busca una ciudad por su ID.
-	//  *
-	//  * @param cityId - ID de la ciudad (UUID) a buscar.
-	//  * @returns Una promesa que resuelve con la ciudad encontrada, o `null` si no existe.
-	//  */
-	// private async findCityById(cityId: string): Promise<City> {
-	// 	const cityFound = await this.cityRepository.findOne({
-	// 		where: {
-	// 			id: cityId,
-	// 		},
-	// 	});
-
-	// 	return cityFound;
-	// }
 }
