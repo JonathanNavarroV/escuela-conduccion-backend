@@ -22,7 +22,9 @@ export const MessageKeys = {
 		NOT_FOUND: "branch.not_found",
 	},
 
-	COUNTRY: {},
+	COUNTRY: {
+		NOT_FOUND: "country.not_found",
+	},
 
 	REGION: {},
 

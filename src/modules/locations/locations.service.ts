@@ -1,14 +1,18 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { MessageKeys } from "src/common/constants/message-keys.constant";
 import { Repository } from "typeorm";
 import { Country } from "./entities/country.entity";
 import { District } from "./entities/district.entity";
+import { LocationLevel } from "./entities/location-level.entity";
 import { Province } from "./entities/province.entity";
 import { Region } from "./entities/region.entity";
 
 @Injectable()
 export class LocationsService {
 	public constructor(
+		@InjectRepository(LocationLevel)
+		private locationLevelRepository: Repository<LocationLevel>,
 		@InjectRepository(Country) private countryRepository: Repository<Country>,
 		@InjectRepository(Region) private regionRepository: Repository<Region>,
 		@InjectRepository(Province)
@@ -18,13 +22,46 @@ export class LocationsService {
 	) {}
 
 	/**
+	 * Retorna todos los niveles de localización asociadas al país configurado en la variable de entorno `SCHOOL_COUNTRY`.
+	 *
+	 * - Busca el país por su nombre (`SCHOOL_COUNTRY`).
+	 * - Si no se encuentra el país, lanza una excepción 404.
+	 * - Si el país existe, retorna todas los niveles de localización relacionadas con él.
+	 *
+	 * @returns Una promesa que resuelve con un arreglo de objetos `LocationLevel` asociados al país.
+	 *
+	 * @throws {NotFoundException} Si no se encuentra el país.
+	 */
+	public async findLocationLevels(): Promise<LocationLevel[]> {
+		const countryName = process.env.SCHOOL_COUNTRY;
+
+		const country = await this.findCountryByName(countryName);
+
+		if (!country) {
+			throw new NotFoundException({
+				messageKey: MessageKeys.COUNTRY.NOT_FOUND,
+			});
+		}
+
+		const locationLevelFound = await this.locationLevelRepository.find({
+			where: {
+				countryId: country.id,
+			},
+		});
+
+		return locationLevelFound;
+	}
+
+	/**
 	 * Retorna todas las regiones asociadas al país configurado en la variable de entorno `SCHOOL_COUNTRY`.
 	 *
 	 * - Busca el país por su nombre (`SCHOOL_COUNTRY`).
-	 * - Si no se encuentra el país, retorna un arreglo vacío.
+	 * - Si no se encuentra el país, lanza una excepción 404.
 	 * - Si el país existe, retorna todas las regiones relacionadas con él.
 	 *
-	 * @returns Una promesa que resuelve con un arreglo de objetos `Region` asociados al país, o un arreglo vacío si el país no existe.
+	 * @returns Una promesa que resuelve con un arreglo de objetos `Region` asociados al país.
+	 *
+	 * @throws {NotFoundException} Si no se encuentra el país.
 	 */
 	public async findAllRegions(): Promise<Region[]> {
 		const countryName = process.env.SCHOOL_COUNTRY;

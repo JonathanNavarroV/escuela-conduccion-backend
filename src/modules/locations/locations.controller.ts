@@ -3,6 +3,7 @@ import { ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
 import { MessageKeys } from "src/common/constants/message-keys.constant";
 import { SuccessMessageKey } from "src/common/decorators/success-message.decorator";
 import { District } from "./entities/district.entity";
+import { LocationLevel } from "./entities/location-level.entity";
 import { Province } from "./entities/province.entity";
 import { Region } from "./entities/region.entity";
 import { LocationsService } from "./locations.service";
@@ -10,6 +11,23 @@ import { LocationsService } from "./locations.service";
 @Controller("locations")
 export class LocationsController {
 	public constructor(private readonly locationService: LocationsService) {}
+
+	@Get("location_levels")
+	@ApiOperation({
+		summary: "Obtener los niveles de localización del país de la escuela.",
+		description:
+			"Retorna una lista con todos los niveles de localización del país de la escuela.",
+	})
+	@ApiResponse({
+		status: 200,
+		description: "Listado de niveles de localización obtenido correctamente.",
+		type: LocationLevel,
+		isArray: true,
+	})
+	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
+	public findLocationLevels(): Promise<LocationLevel[]> {
+		return this.locationService.findLocationLevels();
+	}
 
 	@Get("regions")
 	@ApiOperation({
