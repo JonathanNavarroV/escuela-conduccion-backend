@@ -9,13 +9,14 @@ import {
 	IsString,
 	IsUrl,
 	IsUUID,
-	MinLength,
+	Length,
 } from "class-validator";
 import { UserRole } from "../entities/user.entity";
 
 export class CreateUserDto {
 	@IsString()
 	@IsNotEmpty()
+	@Length(1, 100)
 	@ApiProperty({
 		description: "Nombre del usuario.",
 		example: "Juan Carlos",
@@ -24,6 +25,7 @@ export class CreateUserDto {
 
 	@IsString()
 	@IsNotEmpty()
+	@Length(1, 50)
 	@ApiProperty({
 		description: "Apellido paterno del usuario.",
 		example: "Pérez",
@@ -32,6 +34,7 @@ export class CreateUserDto {
 
 	@IsString()
 	@IsNotEmpty()
+	@Length(1, 50)
 	@ApiProperty({
 		description: "Apellido materno del usuario.",
 		example: "González",
@@ -40,6 +43,7 @@ export class CreateUserDto {
 
 	@IsEmail()
 	@IsNotEmpty()
+	@Length(1, 255)
 	@ApiProperty({
 		description: "Correo electrónico del usuario.",
 		example: "juan.perez@ejemplo.com",
@@ -48,7 +52,7 @@ export class CreateUserDto {
 
 	@IsString()
 	@IsNotEmpty()
-	@MinLength(6)
+	@Length(6, 255)
 	@ApiProperty({
 		description: "Contraseña del usuario (Mínimo 6 caracteres).",
 		example: "contraseña.segura.123",
@@ -57,9 +61,11 @@ export class CreateUserDto {
 
 	@IsUrl()
 	@IsOptional()
+	@Length(1, 255)
 	@ApiProperty({
 		description: "URL de la foto de perfil.",
 		example: "https://ejemplo.com/juan.jpg",
+		required: false,
 	})
 	public photo: string;
 
@@ -89,6 +95,7 @@ export class UpdateUserDto extends PartialType(
 	@ApiProperty({
 		description: "Indica si el usuario está activo o no.",
 		example: true,
+		required: false,
 	})
 	public isActive: boolean;
 }

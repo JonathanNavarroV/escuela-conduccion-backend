@@ -19,7 +19,7 @@ export class Province {
 	@Column({ type: "varchar", length: 50 })
 	public name: string;
 
-	@ManyToOne(() => Country, (country) => country.provinces, { nullable: false })
+	@ManyToOne(() => Country, (country) => country.provinces)
 	@JoinColumn({ name: "countryId" })
 	public country: Country;
 
@@ -30,7 +30,7 @@ export class Province {
 	@JoinColumn({ name: "regionId" })
 	public region: Region;
 
-	@Column({ nullable: true, type: "uniqueidentifier" })
+	@Column({ type: "uniqueidentifier", nullable: true })
 	public regionId: string;
 
 	@OneToMany(() => District, (district) => district.province)

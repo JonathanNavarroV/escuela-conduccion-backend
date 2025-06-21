@@ -9,7 +9,7 @@ export class Country {
 	@PrimaryColumn("uuid")
 	public id: string = uuidv4();
 
-	@Column({ unique: true, type: "varchar", length: 50 })
+	@Column({ type: "varchar", length: 50, unique: true })
 	public name: string;
 
 	@OneToMany(() => LocationLevel, (locationLevel) => locationLevel.country)

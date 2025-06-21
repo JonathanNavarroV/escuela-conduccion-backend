@@ -1,4 +1,12 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
+import { Branch } from "src/modules/branches/entities/branch.entity";
+import {
+	Column,
+	Entity,
+	JoinColumn,
+	ManyToOne,
+	OneToMany,
+	PrimaryColumn,
+} from "typeorm";
 import { v4 as uuidv4 } from "uuid";
 import { Province } from "./province.entity";
 
@@ -18,4 +26,7 @@ export class District {
 
 	@Column({ type: "uniqueidentifier" })
 	public provinceId: string;
+
+	@OneToMany(() => Branch, (branch) => branch.district)
+	public branches: Branch[];
 }

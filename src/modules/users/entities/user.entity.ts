@@ -13,33 +13,29 @@ export class User {
 	@PrimaryColumn("uuid")
 	public id: string = uuidv4();
 
-	@Column()
+	@Column({ type: "varchar", length: 100 })
 	public firstName: string;
 
-	@Column()
+	@Column({ type: "varchar", length: 50 })
 	public lastNameFather: string;
 
-	@Column()
+	@Column({ type: "varchar", length: 50 })
 	public lastNameMother: string;
 
-	@Column({ unique: true })
+	@Column({ type: "varchar", length: 255, unique: true })
 	public email: string;
 
-	@Column()
+	@Column({ type: "varchar", length: 100 })
 	@Exclude()
 	public password: string;
 
-	@Column({ nullable: true })
+	@Column({ type: "varchar", length: 255, nullable: true })
 	public photo: string;
 
-	@Column({
-		type: "varchar",
-		length: 30,
-		default: UserRole.BRANCH_ADMIN,
-	})
+	@Column({ type: "varchar", length: 30, default: UserRole.BRANCH_ADMIN })
 	public role: UserRole;
 
-	@Column({ default: true })
+	@Column({ type: "bit", default: true })
 	public isActive: boolean;
 
 	@ManyToMany(() => Branch, (branch) => branch.user, { eager: true })
