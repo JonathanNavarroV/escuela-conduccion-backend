@@ -8,7 +8,7 @@ export enum LocationKey {
 	DISTRICT = "district",
 }
 
-@Entity("location-levels")
+@Entity("location_levels")
 export class LocationLevel {
 	@PrimaryColumn("uuid")
 	public id: string = uuidv4();
