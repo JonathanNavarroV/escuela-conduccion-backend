@@ -63,7 +63,7 @@ export class CreateBranchDto {
 	@IsNotEmpty()
 	@ApiProperty({
 		description: "ID de la comuna donde se ubica la sede.",
-		example: "ad3cc723-f6fe-4df6-9854-9439f3a85461",
+		example: "F420267D-CD89-40E2-896F-5520E09D3F4B",
 	})
 	public districtId: string;
 }
