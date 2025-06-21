@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { plainToInstance } from "class-transformer";
 import { MessageKeys } from "src/common/constants/message-keys.constant";
 import { Repository } from "typeorm";
 import { Country } from "./entities/country.entity";
@@ -49,7 +50,7 @@ export class LocationsService {
 			},
 		});
 
-		return locationLevelFound;
+		return plainToInstance(LocationLevel, locationLevelFound);
 	}
 
 	/**
