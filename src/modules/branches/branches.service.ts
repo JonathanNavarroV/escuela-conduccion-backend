@@ -6,6 +6,7 @@ import {
 import { InjectRepository } from "@nestjs/typeorm";
 import { MessageKeys } from "src/common/constants/message-keys.constant";
 import { Repository } from "typeorm";
+import { District } from "../locations/entities/district.entity";
 import { CreateBranchDto, UpdateBranchDto } from "./dto/branch.dto";
 import { Branch } from "./entities/branch.entity";
 
@@ -13,6 +14,8 @@ import { Branch } from "./entities/branch.entity";
 export class BranchesService {
 	public constructor(
 		@InjectRepository(Branch) private branchRepository: Repository<Branch>,
+		@InjectRepository(District)
+		private districtRepository: Repository<District>,
 	) {}
 
 	/**
@@ -30,6 +33,15 @@ export class BranchesService {
 		if (!!branchFound) {
 			throw new ConflictException({
 				messageKey: MessageKeys.BRANCH.ALREADY_EXIST,
+			});
+		}
+
+		const districtFound = await this.findDistrictById(
+			createBranchDto.districtId,
+		);
+		if (!districtFound) {
+			throw new NotFoundException({
+				messageKey: MessageKeys.DISTRICT.NOT_FOUND,
 			});
 		}
 
@@ -77,7 +89,7 @@ export class BranchesService {
 
 	/**
 	 * Busca una sede por su ID.
-	 * Si se encuentra, retorna la sede como una instancia de UserEntity.
+	 * Si se encuentra, retorna la sede como una instancia de BranchEntity.
 	 *
 	 * @param id - ID de la sede (UUID).
 	 * @returns Una promesa que resuelve con la sede.
@@ -107,6 +119,23 @@ export class BranchesService {
 		return this.branchRepository.findOne({
 			where: {
 				name,
+			},
+		});
+	}
+
+	/**
+	 * Busca una comuna por su ID.
+	 * Si se encuentra, retorna la comuna como una instancia de DistrictEntity.
+	 *
+	 * @param districtId - ID de la comuna (UUID).
+	 * @returns Una promesa que resuelve con la comuna.
+	 *
+	 * @throws {NotFoundException} Si no se encuentra una comuna con el ID proporcionado.
+	 */
+	private async findDistrictById(districtId): Promise<District> {
+		return this.districtRepository.findOne({
+			where: {
+				id: districtId,
 			},
 		});
 	}

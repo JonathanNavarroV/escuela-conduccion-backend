@@ -22,6 +22,16 @@ export const MessageKeys = {
 		NOT_FOUND: "branch.not_found",
 	},
 
+	COUNTRY: {},
+
+	REGION: {},
+
+	PROVINCE: {},
+
+	DISTRICT: {
+		NOT_FOUND: "district.not_found",
+	},
+
 	AUTH: {
 		UNAUTHORIZED: "auth.unauthorized",
 		INVALID_CREDENTIALS: "auth.invalid_credentials",
