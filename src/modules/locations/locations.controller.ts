@@ -87,7 +87,7 @@ export class LocationsController {
 		return this.locationService.findProvincesByRegionId(regionId);
 	}
 
-	@Get("provinces/:provinceId/district")
+	@Get("provinces/:provinceId/districts")
 	@ApiOperation({
 		summary: "Obtener comunas por provincia",
 		description:
