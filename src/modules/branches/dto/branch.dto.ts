@@ -11,7 +11,6 @@ import {
 
 export class CreateBranchDto {
 	@IsString()
-	@IsNotEmpty()
 	@Length(1, 100)
 	@ApiProperty({
 		description: "Nombre de la sede.",
@@ -21,7 +20,6 @@ export class CreateBranchDto {
 	public name: string;
 
 	@IsEmail()
-	@IsNotEmpty()
 	@Length(1, 255)
 	@ApiProperty({
 		description: "Correo electrónico de la sede.",
@@ -31,31 +29,31 @@ export class CreateBranchDto {
 	public email: string;
 
 	@IsString()
-	@IsNotEmpty()
 	@IsOptional()
 	@Length(1, 30)
 	@ApiProperty({
 		description: "Número telefónico fijo de la sede.",
 		example: "+56 2 1234 5678",
+		maxLength: 30,
 		required: false,
 	})
 	public phone: string;
 
 	@IsString()
-	@IsNotEmpty()
 	@Length(1, 30)
 	@ApiProperty({
 		description: "Número de teléfono móvil de contacto.",
 		example: "+56 9 8765 4321",
+		maxLength: 30,
 	})
 	public mobile: string;
 
 	@IsString()
-	@IsNotEmpty()
 	@Length(1, 255)
 	@ApiProperty({
 		description: "Dirección física de la sede.",
 		example: "Av. Pajaritos 1234",
+		maxLength: 255,
 	})
 	public address: string;
 

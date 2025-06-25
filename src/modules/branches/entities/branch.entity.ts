@@ -35,7 +35,7 @@ export class Branch {
 	public district: District;
 
 	@Column({ type: "uniqueidentifier" })
-	public districtId;
+	public districtId: string;
 
 	@Column({ type: "bit", default: true })
 	public isActive: boolean;
