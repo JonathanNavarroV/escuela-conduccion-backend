@@ -22,7 +22,7 @@ export class Branch {
 	public email: string;
 
 	@Column({ type: "varchar", length: 30, nullable: true })
-	public phone: string;
+	public phone: string | null;
 
 	@Column({ type: "varchar", length: 30 })
 	public mobile: string;
