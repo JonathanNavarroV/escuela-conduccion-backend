@@ -28,7 +28,7 @@ export class User {
 	public password: string;
 
 	@Column({ type: "varchar", length: 255, nullable: true })
-	public photo: string;
+	public photo: string | null;
 
 	@Column({ type: "varchar", length: 30, default: UserRole.BRANCH_ADMIN })
 	public role: UserRole;
