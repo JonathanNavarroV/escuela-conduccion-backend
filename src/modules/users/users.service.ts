@@ -119,7 +119,7 @@ export class UsersService {
 				{ searchTerm: `%${searchTerm}%` },
 			)
 			.orderBy("user.isActive", "DESC")
-			.addOrderBy("user.name", "ASC")
+			.addOrderBy("user.firstName", "ASC")
 			.getMany();
 
 		return plainToInstance(User, usersFound);
