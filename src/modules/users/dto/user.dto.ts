@@ -81,7 +81,7 @@ export class CreateUserDto {
 	@IsUUID(4, { each: true })
 	@ApiProperty({
 		description: "IDs de las sedes asociadas al usuario.",
-		example: ["ad3cc723-f6fe-4df6-9854-9439f3a85461"],
+		example: ["498E4141-8E06-4A31-864A-D6CCFC989E27"],
 	})
 	public branchIds: string[];
 }

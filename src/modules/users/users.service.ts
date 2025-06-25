@@ -6,11 +6,15 @@ import {
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import * as bcrypt from "bcrypt";
-import { plainToInstance } from "class-transformer";
 import { MessageKeys } from "src/common/constants/message-keys.constant";
+import {
+	transformResponseArray,
+	transformResponseSingle,
+} from "src/common/helpers/transform-response.helper";
 import { Repository } from "typeorm";
 import { BranchesService } from "../branches/branches.service";
 import { Branch } from "../branches/entities/branch.entity";
+import { UserResponseDto } from "./dto/user-response.dto";
 import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
 import { User, UserRole } from "./entities/user.entity";
 
@@ -31,10 +35,10 @@ export class UsersService {
 	 * - Valida la existencia de las sedes proporcionadas.
 	 * - Hashea la contraseña antes de guardar al usuario.
 	 * - Persiste el nuevo usuario en la base de datos.
-	 * - Devuelve una instancia de `User`, excluyendo la contraseña gracias al decorador `@Exclude`.
+	 * - Devuelve una instancia de `UserResponseDto`.
 	 *
-	 * @param createUserDto - Datos necesarios para crear el usuario: nombre, email, contraseña, rol y sedes.
-	 * @returns Una promesa que resuelve con el usuario creado (sin la contraseña).
+	 * @param {CreateUserDto} createUserDto - Datos necesarios para crear el usuario: nombre, email, contraseña, rol y sedes.
+	 * @returns {Promise<UserResponseDto>} Promesa que resuelve con el usuario creado (sin la contraseña).
 	 *
 	 * @throws {ConflictException} Si ya existe un usuario con el mismo email.
 	 * @throws {BadRequestException} Si el rol y las sedes están en conflicto:
@@ -42,7 +46,7 @@ export class UsersService {
 	 *   - `users.branch_admin_requires_branches` si no se asignan branches a un `BRANCH_ADMIN`.
 	 * @throws {NotFoundException} Si alguna de las sedes no existe.
 	 */
-	public async create(createUserDto: CreateUserDto): Promise<User> {
+	public async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
 		const { email, password, role, branchIds } = createUserDto;
 
 		const userFound = await this.findOneByEmail(email);
@@ -85,8 +89,7 @@ export class UsersService {
 		});
 		const savedUser = await this.userRepository.save(newUser);
 
-		// Convierte el objeto plano `savedUser` a una instancia de UserEntity, aplicando el decorado @Exclude para ocultar el campo password
-		return plainToInstance(User, savedUser);
+		return transformResponseSingle(UserResponseDto, savedUser);
 	}
 
 	/**
@@ -95,14 +98,14 @@ export class UsersService {
 	 *
 	 * @returns Una promesa que resuelve con un arreglo de todos los usuarios sin la contraseña.
 	 */
-	public async findAll(): Promise<User[]> {
+	public async findAll(): Promise<UserResponseDto[]> {
 		const users = await this.userRepository.find({
 			order: {
 				isActive: "DESC",
 			},
 		});
 
-		return plainToInstance(User, users);
+		return transformResponseArray(UserResponseDto, users);
 	}
 
 	/**
@@ -111,7 +114,9 @@ export class UsersService {
 	 * @param searchTerm - Texto parcial para buscar en el nombre completo.
 	 * @returns Una promesa que resuelve con un arreglo de usuarios que coinciden.
 	 */
-	public async searchByFullName(searchTerm: string): Promise<User[]> {
+	public async searchByFullName(
+		searchTerm: string,
+	): Promise<UserResponseDto[]> {
 		const usersFound = await this.userRepository
 			.createQueryBuilder("user")
 			.where(
@@ -122,7 +127,7 @@ export class UsersService {
 			.addOrderBy("user.firstName", "ASC")
 			.getMany();
 
-		return plainToInstance(User, usersFound);
+		return transformResponseArray(UserResponseDto, usersFound);
 	}
 
 	/**
@@ -134,7 +139,7 @@ export class UsersService {
 	 *
 	 * @throws {NotFoundException} Si no se encuentra un usuario con el ID proporcionado.
 	 */
-	public async findOneById(id: string): Promise<User> {
+	public async findOneById(id: string): Promise<UserResponseDto> {
 		const userFound = await this.userRepository.findOne({
 			where: {
 				id,
@@ -144,7 +149,7 @@ export class UsersService {
 			throw new NotFoundException({ messageKey: MessageKeys.USER.NOT_FOUND });
 		}
 
-		return plainToInstance(User, userFound);
+		return transformResponseSingle(UserResponseDto, userFound);
 	}
 
 	/**
@@ -181,7 +186,10 @@ export class UsersService {
 	 * @throws {BadRequestException} Si las reglas de asociación de sedes no se cumplen según el rol.
 	 * @throws {NotFoundException} Si alguna de las sedes no existe.
 	 */
-	public async update(id: string, updateUserDTO: UpdateUserDto): Promise<User> {
+	public async update(
+		id: string,
+		updateUserDTO: UpdateUserDto,
+	): Promise<UserResponseDto> {
 		const { email, password, branchIds, ...rest } = updateUserDTO;
 
 		const userFound = await this.userRepository.findOne({
@@ -241,6 +249,6 @@ export class UsersService {
 
 		const updatedUser = await this.userRepository.save(userFound);
 
-		return plainToInstance(User, updatedUser);
+		return transformResponseSingle(UserResponseDto, updatedUser);
 	}
 }
