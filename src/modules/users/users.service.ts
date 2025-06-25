@@ -74,7 +74,7 @@ export class UsersService {
 
 			branches = await Promise.all(
 				createUserDto.branchIds.map((id) =>
-					this.branchesService.findOneById(id),
+					this.branchesService.findOneEntityById(id),
 				),
 			);
 		}
@@ -231,7 +231,7 @@ export class UsersService {
 			}
 
 			branches = await Promise.all(
-				branchIds.map((id) => this.branchesService.findOneById(id)),
+				branchIds.map((id) => this.branchesService.findOneEntityById(id)),
 			);
 		}
 

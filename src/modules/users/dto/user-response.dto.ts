@@ -1,12 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Expose } from "class-transformer";
-import { Branch } from "src/modules/branches/entities/branch.entity";
+import { Expose, Type } from "class-transformer";
+import { BranchResponseDto } from "src/modules/branches/dto/branch-response.dto";
 import { UserRole } from "../entities/user.entity";
 
 export class UserResponseDto {
 	@ApiProperty({
 		description: "ID único del usuario.",
-		example: "9f84fa5c-4b6e-4e90-90f5-5cc9cb7a789f",
+		example: "812B468B-01C7-42C7-84C4-96A339BC3A1C",
 	})
 	@Expose()
 	public id: string;
@@ -65,8 +65,9 @@ export class UserResponseDto {
 
 	@ApiProperty({
 		description: "Listado de sedes asociadas al usuario.",
-		type: () => [Branch],
+		type: () => [BranchResponseDto],
 	})
+	@Type(() => BranchResponseDto)
 	@Expose()
-	public branches: Branch[];
+	public branches: BranchResponseDto[];
 }

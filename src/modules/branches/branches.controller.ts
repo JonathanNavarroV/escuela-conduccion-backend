@@ -17,8 +17,8 @@ import {
 import { MessageKeys } from "src/common/constants/message-keys.constant";
 import { SuccessMessageKey } from "src/common/decorators/success-message.decorator";
 import { BranchesService } from "./branches.service";
+import { BranchResponseDto } from "./dto/branch-response.dto";
 import { CreateBranchDto, UpdateBranchDto } from "./dto/branch.dto";
-import { Branch } from "./entities/branch.entity";
 
 @Controller("branches")
 @ApiBearerAuth()
@@ -34,14 +34,16 @@ export class BranchesController {
 	@ApiResponse({
 		status: 201,
 		description: "Sede creada correctamente.",
-		type: Branch,
+		type: BranchResponseDto,
 	})
 	@ApiResponse({
 		status: 409,
 		description: "Ya existe una sede con ese nombre.",
 	})
 	@SuccessMessageKey(MessageKeys.BRANCH.CREATED)
-	public create(@Body() createBranchDto: CreateBranchDto): Promise<Branch> {
+	public create(
+		@Body() createBranchDto: CreateBranchDto,
+	): Promise<BranchResponseDto> {
 		return this.branchService.create(createBranchDto);
 	}
 
@@ -54,11 +56,11 @@ export class BranchesController {
 	@ApiResponse({
 		status: 200,
 		description: "Listado de sedes obtenido correctamente.",
-		type: Branch,
+		type: BranchResponseDto,
 		isArray: true,
 	})
 	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
-	public findAll(): Promise<Branch[]> {
+	public findAll(): Promise<BranchResponseDto[]> {
 		return this.branchService.findAll();
 	}
 
@@ -71,7 +73,7 @@ export class BranchesController {
 	@ApiResponse({
 		status: 200,
 		description: "Sedes encontradas que coinciden con la búsqueda.",
-		type: Branch,
+		type: BranchResponseDto,
 	})
 	@ApiResponse({
 		status: 402,
@@ -80,7 +82,7 @@ export class BranchesController {
 	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
 	public searchByName(
 		@Query("searchTerm") searchTerm: string,
-	): Promise<Branch[]> {
+	): Promise<BranchResponseDto[]> {
 		return this.branchService.searchByName(searchTerm);
 	}
 
@@ -97,14 +99,16 @@ export class BranchesController {
 	@ApiResponse({
 		status: 200,
 		description: "Sede encontrada.",
-		type: Branch,
+		type: BranchResponseDto,
 	})
 	@ApiResponse({
 		status: 404,
 		description: "No se encontró una sede con el ID proporcionado.",
 	})
 	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
-	public findOneById(@Param("id", ParseUUIDPipe) id: string): Promise<Branch> {
+	public findOneById(
+		@Param("id", ParseUUIDPipe) id: string,
+	): Promise<BranchResponseDto> {
 		return this.branchService.findOneById(id);
 	}
 
@@ -135,7 +139,7 @@ export class BranchesController {
 	public update(
 		@Param("id", ParseUUIDPipe) id: string,
 		@Body() updateBranchDto: UpdateBranchDto,
-	): Promise<Branch> {
+	): Promise<BranchResponseDto> {
 		return this.branchService.update(id, updateBranchDto);
 	}
 
@@ -158,7 +162,9 @@ export class BranchesController {
 		description: "Sede no encontrada.",
 	})
 	@SuccessMessageKey(MessageKeys.BRANCH.ACTIVATED)
-	public activate(@Param("id", ParseUUIDPipe) id: string): Promise<Branch> {
+	public activate(
+		@Param("id", ParseUUIDPipe) id: string,
+	): Promise<BranchResponseDto> {
 		return this.branchService.update(id, { isActive: true });
 	}
 
@@ -182,7 +188,9 @@ export class BranchesController {
 		description: "Sede no encontrada.",
 	})
 	@SuccessMessageKey(MessageKeys.BRANCH.DEACTIVATED)
-	public deactivate(@Param("id", ParseUUIDPipe) id: string): Promise<Branch> {
+	public deactivate(
+		@Param("id", ParseUUIDPipe) id: string,
+	): Promise<BranchResponseDto> {
 		return this.branchService.update(id, { isActive: false });
 	}
 }

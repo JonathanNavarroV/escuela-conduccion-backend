@@ -156,6 +156,28 @@ export class LocationsService {
 	}
 
 	/**
+	 * Busca una comuna por su ID.
+	 *
+	 * @param {string} districtId - ID de la comuna (UUID).
+	 * @returns {Promise<District | null>} Promesa que resuelve con la comuna o null si no existe.
+	 *
+	 * @example
+	 * const district = await branchesService.findDistrictById("uuid-district-id");
+	 * if (district) {
+	 *   console.log(district.name);
+	 * }
+	 *
+	 * @async
+	 */
+	public async findDistrictById(districtId): Promise<District> {
+		return this.districtRepository.findOne({
+			where: {
+				id: districtId,
+			},
+		});
+	}
+
+	/**
 	 * Busca un país por su nombre.
 	 *
 	 * - Realiza una búsqueda exacta por el nombre del país.
