@@ -126,6 +126,7 @@ export class BranchesController {
 	@ApiResponse({
 		status: 200,
 		description: "Sede actualizada correctamente.",
+		type: BranchResponseDto,
 	})
 	@ApiResponse({
 		status: 404,
@@ -156,6 +157,7 @@ export class BranchesController {
 	@ApiResponse({
 		status: 200,
 		description: "Sede activada correctamente.",
+		type: BranchResponseDto,
 	})
 	@ApiResponse({
 		status: 404,
@@ -182,6 +184,7 @@ export class BranchesController {
 	@ApiResponse({
 		status: 200,
 		description: "Sede desactivada correctamente.",
+		type: BranchResponseDto,
 	})
 	@ApiResponse({
 		status: 404,

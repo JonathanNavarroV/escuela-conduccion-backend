@@ -1,8 +1,12 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { plainToInstance } from "class-transformer";
 import { MessageKeys } from "src/common/constants/message-keys.constant";
+import { transformResponseArray } from "src/common/helpers/transform-response.helper";
 import { Repository } from "typeorm";
+import { DistrictResponseDto } from "./dto/district-response.dto";
+import { LocationLevelResponseDto } from "./dto/location-level-response.dto";
+import { ProvinceResponseDto } from "./dto/province-response.dto";
+import { RegionResponseDto } from "./dto/region-response.dto";
 import { Country } from "./entities/country.entity";
 import { District } from "./entities/district.entity";
 import { LocationLevel } from "./entities/location-level.entity";
@@ -23,20 +27,27 @@ export class LocationsService {
 	) {}
 
 	/**
-	 * Retorna todos los niveles de localización asociadas al país configurado en la variable de entorno `SCHOOL_COUNTRY`.
+	 * Obtiene los niveles de localización asociados al país definido por `SCHOOL_COUNTRY`.
 	 *
-	 * - Busca el país por su nombre (`SCHOOL_COUNTRY`).
-	 * - Si no se encuentra el país, lanza una excepción 404.
-	 * - Si el país existe, retorna todas los niveles de localización relacionadas con él.
+	 * Descripción detallada:
+	 * - Busca el país configurado en la variable de entorno `SCHOOL_COUNTRY`.
+	 * - Si el país no existe, lanza un error 404.
+	 * - Si se encuentra, retorna los niveles de localización asociados.
 	 *
-	 * @returns Una promesa que resuelve con un arreglo de objetos `LocationLevel` asociados al país.
+	 * @returns {Promise<LocationLevelResponseDto[]>} Arreglo de niveles de localización como DTOs.
 	 *
 	 * @throws {NotFoundException} Si no se encuentra el país.
+	 *
+	 * @example
+	 * const levels = await service.findLocationLevels();
+	 * console.log(levels);
+	 *
+	 * @async
 	 */
-	public async findLocationLevels(): Promise<LocationLevel[]> {
+	public async findLocationLevels(): Promise<LocationLevelResponseDto[]> {
 		const countryName = process.env.SCHOOL_COUNTRY;
 
-		const country = await this.findCountryByName(countryName);
+		const country = await this.findCountryEntityByName(countryName);
 
 		if (!country) {
 			throw new NotFoundException({
@@ -50,24 +61,26 @@ export class LocationsService {
 			},
 		});
 
-		return plainToInstance(LocationLevel, locationLevelFound);
+		return transformResponseArray(LocationLevelResponseDto, locationLevelFound);
 	}
 
 	/**
-	 * Retorna todas las regiones asociadas al país configurado en la variable de entorno `SCHOOL_COUNTRY`.
+	 * Obtiene todas las regiones del país definido por `SCHOOL_COUNTRY`.
 	 *
-	 * - Busca el país por su nombre (`SCHOOL_COUNTRY`).
-	 * - Si no se encuentra el país, lanza una excepción 404.
-	 * - Si el país existe, retorna todas las regiones relacionadas con él.
+	 * Descripción detallada:
+	 * - Si no se encuentra el país, retorna un arreglo vacío.
 	 *
-	 * @returns Una promesa que resuelve con un arreglo de objetos `Region` asociados al país.
+	 * @returns {Promise<RegionResponseDto[]>} Arreglo de regiones como DTOs.
 	 *
-	 * @throws {NotFoundException} Si no se encuentra el país.
+	 * @example
+	 * const regions = await service.findAllRegions();
+	 *
+	 * @async
 	 */
-	public async findAllRegions(): Promise<Region[]> {
+	public async findAllRegions(): Promise<RegionResponseDto[]> {
 		const countryName = process.env.SCHOOL_COUNTRY;
 
-		const country = await this.findCountryByName(countryName);
+		const country = await this.findCountryEntityByName(countryName);
 
 		if (!country) {
 			return [];
@@ -82,22 +95,26 @@ export class LocationsService {
 			},
 		});
 
-		return regionsFound;
+		return transformResponseArray(RegionResponseDto, regionsFound);
 	}
 
 	/**
-	 * Retorna todas las las provincias asociadas al país configurado en la variable de entorno `SCHOOL_COUNTRY`.
+	 * Obtiene todas las provincias del país definido por `SCHOOL_COUNTRY`.
 	 *
-	 * - Busca el país por su nombre (`SCHOOL_COUNTRY`).
+	 * Descripción detallada:
 	 * - Si no se encuentra el país, retorna un arreglo vacío.
-	 * - Si el país existe, retorna todas las regiones relacionadas con él.
 	 *
-	 * @returns Una promesa que resuelve con un arreglo de objetos `Province` asociados al país, o un arreglo vacío si el país no existe.
+	 * @returns {Promise<ProvinceResponseDto[]>} Arreglo de provincias como DTOs.
+	 *
+	 * @example
+	 * const provinces = await service.findAllProvinces();
+	 *
+	 * @async
 	 */
-	public async findAllProvinces(): Promise<Province[]> {
+	public async findAllProvinces(): Promise<ProvinceResponseDto[]> {
 		const countryName = process.env.SCHOOL_COUNTRY;
 
-		const country = await this.findCountryByName(countryName);
+		const country = await this.findCountryEntityByName(countryName);
 
 		if (!country) {
 			return [];
@@ -112,16 +129,26 @@ export class LocationsService {
 			},
 		});
 
-		return provincesFound;
+		return transformResponseArray(ProvinceResponseDto, provincesFound);
 	}
 
 	/**
-	 * Retorna todos las provincias asociadas a una región específica.
+	 * Obtiene todas las provincias pertenecientes a una región.
 	 *
-	 * @param regionId - ID de la región (UUID) para la que se desean obtener las provincias.
-	 * @returns Una promesa que resuelve con un arreglo de objetos `Province` pertenecientes a la región.
+	 * Descripción detallada:
+	 * - Realiza la búsqueda filtrando por `regionId`.
+	 *
+	 * @param {string} regionId - ID de la región.
+	 * @returns {Promise<ProvinceResponseDto[]>} Arreglo de provincias como DTOs.
+	 *
+	 * @example
+	 * const provinces = await service.findProvincesByRegionId('uuid-region');
+	 *
+	 * @async
 	 */
-	public async findProvincesByRegionId(regionId: string): Promise<Province[]> {
+	public async findProvincesByRegionId(
+		regionId: string,
+	): Promise<ProvinceResponseDto[]> {
 		const provincesFound = await this.provinceRepository.find({
 			where: {
 				regionId,
@@ -131,18 +158,26 @@ export class LocationsService {
 			},
 		});
 
-		return provincesFound;
+		return transformResponseArray(ProvinceResponseDto, provincesFound);
 	}
 
 	/**
-	 * Retorna todos las comunas asociadas a una provincia específica.
+	 * Obtiene todas las comunas pertenecientes a una provincia.
 	 *
-	 * @param provinceId - ID de la provincia (UUID) para la que se desean obtener las comunas.
-	 * @returns Una promesa que resuelve con un arreglo de objetos `District` pertenecientes a la región.
+	 * Descripción detallada:
+	 * - Realiza la búsqueda filtrando por `provinceId`.
+	 *
+	 * @param {string} provinceId - ID de la provincia.
+	 * @returns {Promise<DistrictResponseDto[]>} Arreglo de comunas como DTOs.
+	 *
+	 * @example
+	 * const districts = await service.findDistrictsByProvinceId('uuid-province');
+	 *
+	 * @async
 	 */
 	public async findDistrictsByProvinceId(
 		provinceId: string,
-	): Promise<District[]> {
+	): Promise<DistrictResponseDto[]> {
 		const districtsFound = await this.districtRepository.find({
 			where: {
 				provinceId,
@@ -152,24 +187,25 @@ export class LocationsService {
 			},
 		});
 
-		return districtsFound;
+		return transformResponseArray(DistrictResponseDto, districtsFound);
 	}
 
 	/**
 	 * Busca una comuna por su ID.
 	 *
+	 * Descripción detallada:
+	 * - Devuelve el objeto District si se encuentra o `null` en caso contrario.
+	 *
 	 * @param {string} districtId - ID de la comuna (UUID).
-	 * @returns {Promise<District | null>} Promesa que resuelve con la comuna o null si no existe.
+	 * @returns {Promise<District | null>} Objeto de la entidad o null.
 	 *
 	 * @example
-	 * const district = await branchesService.findDistrictById("uuid-district-id");
-	 * if (district) {
-	 *   console.log(district.name);
-	 * }
+	 * const district = await service.findDistrictEntityById('uuid');
+	 * console.log(district?.name);
 	 *
 	 * @async
 	 */
-	public async findDistrictById(districtId): Promise<District> {
+	public async findDistrictEntityById(districtId): Promise<District> {
 		return this.districtRepository.findOne({
 			where: {
 				id: districtId,
@@ -178,16 +214,20 @@ export class LocationsService {
 	}
 
 	/**
-	 * Busca un país por su nombre.
+	 * Busca un país por su nombre exacto.
 	 *
-	 * - Realiza una búsqueda exacta por el nombre del país.
-	 * - El nombre es recibido como argumento (`countryName`).
-	 * - Si no se encuentra, retorna `null`.
+	 * Descripción detallada:
+	 * - Si no se encuentra un país con ese nombre, retorna null.
 	 *
-	 * @param countryName - Nombre del país a buscar.
-	 * @returns Una promesa que resuelve con un objeto `Country` si se encuentra, o `null` si no existe.
+	 * @param {string} countryName - Nombre del país.
+	 * @returns {Promise<Country | null>} Entidad `Country` o null.
+	 *
+	 * @example
+	 * const country = await service.findCountryEntityByName("Chile");
+	 *
+	 * @async
 	 */
-	private async findCountryByName(countryName: string): Promise<Country> {
+	private async findCountryEntityByName(countryName: string): Promise<Country> {
 		const countryFound = await this.countryRepository.findOne({
 			where: {
 				name: countryName,

@@ -52,7 +52,7 @@ export class BranchesService {
 			});
 		}
 
-		const districtFound = await this.locationService.findDistrictById(
+		const districtFound = await this.locationService.findDistrictEntityById(
 			createBranchDto.districtId,
 		);
 		if (!districtFound) {

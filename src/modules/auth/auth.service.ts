@@ -24,7 +24,7 @@ export class AuthService {
 		email: string,
 		password: string,
 	): Promise<{ access_token: string }> {
-		const user = await this.userService.findOneByEmail(email);
+		const user = await this.userService.findOneEntityByEmail(email);
 		if (!user) {
 			throw new UnauthorizedException({
 				messageKey: MessageKeys.AUTH.INVALID_CREDENTIALS,

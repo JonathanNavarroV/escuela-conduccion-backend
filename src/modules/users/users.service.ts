@@ -53,7 +53,7 @@ export class UsersService {
 	public async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
 		const { email, password, role, branchIds } = createUserDto;
 
-		const userFound = await this.findOneByEmail(email);
+		const userFound = await this.findOneEntityByEmail(email);
 		if (!!userFound) {
 			throw new ConflictException({
 				messageKey: MessageKeys.USER.ALREADY_EXIST,
@@ -198,7 +198,7 @@ export class UsersService {
 	 *
 	 * @async
 	 */
-	public async findOneByEmail(email: string): Promise<User> {
+	public async findOneEntityByEmail(email: string): Promise<User> {
 		return this.userRepository.findOne({
 			where: {
 				email,
@@ -247,7 +247,7 @@ export class UsersService {
 
 		// Validación de email en uso
 		if (email && userFound.email !== email) {
-			const userEmailFound = await this.findOneByEmail(email);
+			const userEmailFound = await this.findOneEntityByEmail(email);
 			if (!!userEmailFound) {
 				throw new ConflictException({
 					messageKey: MessageKeys.USER.ALREADY_EXIST,

@@ -1,4 +1,3 @@
-import { Exclude } from "class-transformer";
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
 import { Country } from "./country.entity";
@@ -27,6 +26,5 @@ export class LocationLevel {
 	public country: Country;
 
 	@Column({ type: "uniqueidentifier" })
-	@Exclude()
 	public countryId: string;
 }
