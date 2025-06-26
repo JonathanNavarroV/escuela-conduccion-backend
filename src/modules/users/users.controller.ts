@@ -16,8 +16,9 @@ import {
 } from "@nestjs/swagger";
 import { MessageKeys } from "src/common/constants/message-keys.constant";
 import { SuccessMessageKey } from "src/common/decorators/success-message.decorator";
+import { UserResponseDto } from "./dto/user-response.dto";
 import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
-import { User, UserRole } from "./entities/user.entity";
+import { UserRole } from "./entities/user.entity";
 import { UsersService } from "./users.service";
 
 @Controller("users")
@@ -35,14 +36,16 @@ export class UsersController {
 	@ApiResponse({
 		status: 201,
 		description: "Usuario creado correctamente.",
-		type: User,
+		type: UserResponseDto,
 	})
 	@ApiResponse({
 		status: 409,
 		description: "Ya existe un usuario con ese correo electrónico.",
 	})
 	@SuccessMessageKey(MessageKeys.USER.CREATED)
-	public create(@Body() createUserDto: CreateUserDto): Promise<User> {
+	public create(
+		@Body() createUserDto: CreateUserDto,
+	): Promise<UserResponseDto> {
 		return this.userService.create(createUserDto);
 	}
 
@@ -59,7 +62,7 @@ export class UsersController {
 		isArray: true,
 	})
 	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
-	public findAllRoles(): Array<any> {
+	public findAllRoles(): Array<string> {
 		return Object.values(UserRole);
 	}
 
@@ -72,11 +75,11 @@ export class UsersController {
 	@ApiResponse({
 		status: 200,
 		description: "Listado de usuarios obtenido correctamente.",
-		type: User,
+		type: UserResponseDto,
 		isArray: true,
 	})
 	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
-	public findAll(): Promise<User[]> {
+	public findAll(): Promise<UserResponseDto[]> {
 		return this.userService.findAll();
 	}
 
@@ -89,7 +92,7 @@ export class UsersController {
 	@ApiResponse({
 		status: 200,
 		description: "Usuarios encontrados que coinciden con la búsqueda.",
-		type: [User],
+		type: [UserResponseDto],
 	})
 	@ApiResponse({
 		status: 404,
@@ -98,7 +101,7 @@ export class UsersController {
 	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
 	public searchByFullName(
 		@Query("searchTerm") searchTerm: string,
-	): Promise<User[]> {
+	): Promise<UserResponseDto[]> {
 		return this.userService.searchByFullName(searchTerm);
 	}
 
@@ -115,14 +118,16 @@ export class UsersController {
 	@ApiResponse({
 		status: 200,
 		description: "Usuario encontrado.",
-		type: User,
+		type: UserResponseDto,
 	})
 	@ApiResponse({
 		status: 404,
 		description: "No se encontró un usuario con el ID proporcionado.",
 	})
 	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
-	public findOneById(@Param("id", ParseUUIDPipe) id: string): Promise<User> {
+	public findOneById(
+		@Param("id", ParseUUIDPipe) id: string,
+	): Promise<UserResponseDto> {
 		return this.userService.findOneById(id);
 	}
 
@@ -140,6 +145,7 @@ export class UsersController {
 	@ApiResponse({
 		status: 200,
 		description: "Usuario actualizado correctamente.",
+		type: UserResponseDto,
 	})
 	@ApiResponse({
 		status: 404,
@@ -153,7 +159,7 @@ export class UsersController {
 	public update(
 		@Param("id", ParseUUIDPipe) id: string,
 		@Body() updateUserDto: UpdateUserDto,
-	): Promise<User> {
+	): Promise<UserResponseDto> {
 		return this.userService.update(id, updateUserDto);
 	}
 
@@ -171,13 +177,16 @@ export class UsersController {
 	@ApiResponse({
 		status: 200,
 		description: "Usuario activado correctamente.",
+		type: UserResponseDto,
 	})
 	@ApiResponse({
 		status: 404,
 		description: "Usuario no encontrado.",
 	})
 	@SuccessMessageKey(MessageKeys.USER.ACTIVATED)
-	public activate(@Param("id", ParseUUIDPipe) id: string): Promise<User> {
+	public activate(
+		@Param("id", ParseUUIDPipe) id: string,
+	): Promise<UserResponseDto> {
 		return this.userService.update(id, { isActive: true });
 	}
 
@@ -195,13 +204,16 @@ export class UsersController {
 	@ApiResponse({
 		status: 200,
 		description: "Usuario desactivado correctamente.",
+		type: UserResponseDto,
 	})
 	@ApiResponse({
 		status: 404,
 		description: "Usuario no encontrado.",
 	})
 	@SuccessMessageKey(MessageKeys.USER.DEACTIVATED)
-	public deactivate(@Param("id", ParseUUIDPipe) id: string): Promise<User> {
+	public deactivate(
+		@Param("id", ParseUUIDPipe) id: string,
+	): Promise<UserResponseDto> {
 		return this.userService.update(id, { isActive: false });
 	}
 }

@@ -5,8 +5,13 @@ import {
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { MessageKeys } from "src/common/constants/message-keys.constant";
+import {
+	transformResponseArray,
+	transformResponseSingle,
+} from "src/common/helpers/transform-response.helper";
 import { Repository } from "typeorm";
-import { District } from "../locations/entities/district.entity";
+import { LocationsService } from "../locations/locations.service";
+import { BranchResponseDto } from "./dto/branch-response.dto";
 import { CreateBranchDto, UpdateBranchDto } from "./dto/branch.dto";
 import { Branch } from "./entities/branch.entity";
 
@@ -14,21 +19,32 @@ import { Branch } from "./entities/branch.entity";
 export class BranchesService {
 	public constructor(
 		@InjectRepository(Branch) private branchRepository: Repository<Branch>,
-		@InjectRepository(District)
-		private districtRepository: Repository<District>,
+		private readonly locationService: LocationsService,
 	) {}
 
 	/**
 	 * Crea una nueva sede en la base de datos.
-	 * Verifica si ya existe una sede con el mismo nombre antes de crearlo.
-	 * Retorna la sede creada como una instancia de UserEntity.
 	 *
-	 * @param createBranchDto - Datos necesarios para crear la sede.
-	 * @returns Una promesa con la sede creada.
+	 * - Verifica si ya existe una sede con el mismo nombre antes de crearla.
+	 * - Valida que la comuna asociada exista.
+	 * - Guarda la nueva sede en la base de datos.
+	 * - Retorna la sede creada como una instancia de BranchResponseDto.
+	 *
+	 * @param {CreateBranchDto} createBranchDto - Datos necesarios para crear la sede.
+	 * @returns {Promise<BranchResponseDto>} Promesa que resuelve con la sede creada.
 	 *
 	 * @throws {ConflictException} Si el nombre ya está registrado.
+	 * @throws {NotFoundException} Si la comuna asociada no existe.
+	 *
+	 * @example
+	 * const newBranch = await branchesService.create(createBranchDto);
+	 * console.log(newBranch.id);
+	 *
+	 * @async
 	 */
-	public async create(createBranchDto: CreateBranchDto): Promise<Branch> {
+	public async create(
+		createBranchDto: CreateBranchDto,
+	): Promise<BranchResponseDto> {
 		const branchFound = await this.findOneByName(createBranchDto.name);
 		if (!!branchFound) {
 			throw new ConflictException({
@@ -36,7 +52,7 @@ export class BranchesService {
 			});
 		}
 
-		const districtFound = await this.findDistrictById(
+		const districtFound = await this.locationService.findDistrictEntityById(
 			createBranchDto.districtId,
 		);
 		if (!districtFound) {
@@ -48,33 +64,48 @@ export class BranchesService {
 		const newBranch = this.branchRepository.create(createBranchDto);
 		const savedBranch = await this.branchRepository.save(newBranch);
 
-		return savedBranch;
+		return transformResponseSingle(BranchResponseDto, savedBranch);
 	}
 
 	/**
-	 * Retorna todas las sedes registradas en la base de datos, ordenadas por `isActive` (activos primero, luego inactivos).
+	 * Obtiene todas las sedes registradas.
 	 *
-	 * @returns Una promesa que resuelve con un arreglo de todas las sedes.
+	 * - Las sedes se ordenan primero por estado activo (`isActive` DESC).
+	 * - Retorna un arreglo de BranchResponseDto con las sedes encontradas.
+	 *
+	 * @returns {Promise<BranchResponseDto[]>} Promesa que resuelve con un arreglo de sedes.
+	 *
+	 * @example
+	 * const branches = await branchesService.findAll();
+	 * console.log(branches.length);
+	 *
+	 * @async
 	 */
-	public async findAll(): Promise<Branch[]> {
+	public async findAll(): Promise<BranchResponseDto[]> {
 		const branches = await this.branchRepository.find({
 			order: {
 				isActive: "DESC",
 			},
 		});
 
-		return branches;
+		return transformResponseArray(BranchResponseDto, branches);
 	}
 
 	/**
-	 * Busca sedes cuyo nombre contiene el término de búsqueda,
-	 * ignorando mayúsculas, minúsculas y tildes.
-	 * Ordena primero por `isActive = true`, luego por nombre.
+	 * Busca sedes cuyo nombre contiene el término de búsqueda ignorando mayúsculas y tildes.
 	 *
-	 * @param searchTerm - Texto parcial para buscar el nombre.
-	 * @returns Una promesa que resuelve con un arreglo de sedes que coinciden.
+	 * - El resultado se ordena por `isActive` descendente y nombre ascendente.
+	 *
+	 * @param {string} searchTerm - Texto parcial para buscar el nombre.
+	 * @returns {Promise<BranchResponseDto[]>} Promesa con arreglo de sedes que coinciden.
+	 *
+	 * @example
+	 * const matches = await branchesService.searchByName("maipú");
+	 * console.log(matches);
+	 *
+	 * @async
 	 */
-	public async searchByName(searchTerm: string): Promise<Branch[]> {
+	public async searchByName(searchTerm: string): Promise<BranchResponseDto[]> {
 		const branchFound = await this.branchRepository
 			.createQueryBuilder("branch")
 			.where(`branch.name COLLATE Latin1_General_CI_AI LIKE :searchTerm`, {
@@ -84,19 +115,53 @@ export class BranchesService {
 			.addOrderBy("branch.name", "ASC")
 			.getMany();
 
-		return branchFound;
+		return transformResponseArray(BranchResponseDto, branchFound);
 	}
 
 	/**
 	 * Busca una sede por su ID.
-	 * Si se encuentra, retorna la sede como una instancia de BranchEntity.
 	 *
-	 * @param id - ID de la sede (UUID).
-	 * @returns Una promesa que resuelve con la sede.
+	 * - Si se encuentra, retorna la sede como una instancia de BranchResponseDto.
 	 *
-	 * @throws {NotFoundException} Si no se encuentra una sede con el ID proporcionado.
+	 * @param {string} id - ID de la sede (UUID).
+	 * @returns {Promise<BranchResponseDto>} Promesa que resuelve con la sede encontrada.
+	 *
+	 * @throws {NotFoundException} Si no existe una sede con el ID proporcionado.
+	 *
+	 * @example
+	 * const branch = await branchesService.findOneById("uuid-branch-id");
+	 * console.log(branch.name);
+	 *
+	 * @async
 	 */
-	public async findOneById(id: string): Promise<Branch> {
+	public async findOneById(id: string): Promise<BranchResponseDto> {
+		const branchFound = await this.branchRepository.findOne({
+			where: {
+				id,
+			},
+		});
+		if (!branchFound) {
+			throw new NotFoundException({ messageKey: MessageKeys.BRANCH.NOT_FOUND });
+		}
+
+		return transformResponseSingle(BranchResponseDto, branchFound);
+	}
+
+	/**
+	 * Busca una entidad de sede por su ID sin transformación a DTO.
+	 *
+	 * @param {string} id - ID de la sede (UUID).
+	 * @returns {Promise<Branch>} Promesa que resuelve con la entidad Branch.
+	 *
+	 * @throws {NotFoundException} Si no existe una sede con el ID proporcionado.
+	 *
+	 * @example
+	 * const branchEntity = await branchesService.findOneEntityById("uuid-branch-id");
+	 * console.log(branchEntity.name);
+	 *
+	 * @async
+	 */
+	public async findOneEntityById(id: string): Promise<Branch> {
 		const branchFound = await this.branchRepository.findOne({
 			where: {
 				id,
@@ -112,10 +177,18 @@ export class BranchesService {
 	/**
 	 * Busca una sede por su nombre.
 	 *
-	 * @param name - El nombre de la sede a buscar.
-	 * @returns Una promesa que resuelve con la sede si se encuentra, o `null` si no existe
+	 * @param {string} name - Nombre de la sede.
+	 * @returns {Promise<BranchResponseDto | null>} Promesa que resuelve con la sede o null si no existe.
+	 *
+	 * @example
+	 * const branch = await branchesService.findOneByName("Maipú");
+	 * if (branch) {
+	 *   console.log(branch.name);
+	 * }
+	 *
+	 * @async
 	 */
-	private async findOneByName(name: string): Promise<Branch> {
+	private async findOneByName(name: string): Promise<BranchResponseDto> {
 		return this.branchRepository.findOne({
 			where: {
 				name,
@@ -124,40 +197,30 @@ export class BranchesService {
 	}
 
 	/**
-	 * Busca una comuna por su ID.
-	 * Si se encuentra, retorna la comuna como una instancia de DistrictEntity.
-	 *
-	 * @param districtId - ID de la comuna (UUID).
-	 * @returns Una promesa que resuelve con la comuna.
-	 *
-	 * @throws {NotFoundException} Si no se encuentra una comuna con el ID proporcionado.
-	 */
-	private async findDistrictById(districtId): Promise<District> {
-		return this.districtRepository.findOne({
-			where: {
-				id: districtId,
-			},
-		});
-	}
-
-	/**
 	 * Actualiza los datos de una sede existente.
 	 *
-	 * - Verifica si la sede existe.
+	 * - Verifica que la sede exista.
 	 * - Valida que el nuevo nombre no esté en uso por otra sede.
-	 * - Reemplaza los datos de la sede existente con los nuevos.
+	 * - Actualiza y guarda los nuevos datos.
+	 * - Retorna la entidad actualizada sin transformación.
 	 *
-	 * @param id - ID de la sede a actualizar.
-	 * @param updateBranchDto - Datos a actualizar.
-	 * @returns Una promesa con la sede actualizada.
+	 * @param {string} id - ID de la sede a actualizar.
+	 * @param {UpdateBranchDto} updateBranchDto - Datos para actualizar.
+	 * @returns {Promise<BranchResponseDto>} Promesa con la sede actualizada.
 	 *
 	 * @throws {NotFoundException} Si no se encuentra la sede.
-	 * @throws {ConflictException} Si el nuevo nombre ya está en uso por otra sede.
+	 * @throws {ConflictException} Si el nombre ya está en uso por otra sede.
+	 *
+	 * @example
+	 * const updatedBranch = await branchesService.update(id, updateBranchDto);
+	 * console.log(updatedBranch.name);
+	 *
+	 * @async
 	 */
 	public async update(
 		id: string,
 		updateBranchDto: UpdateBranchDto,
-	): Promise<Branch> {
+	): Promise<BranchResponseDto> {
 		const { name, ...rest } = updateBranchDto;
 
 		const branchFound = await this.branchRepository.findOne({
@@ -186,6 +249,6 @@ export class BranchesService {
 
 		const updateBranch = await this.branchRepository.save(branchFound);
 
-		return updateBranch;
+		return transformResponseSingle(BranchResponseDto, updateBranch);
 	}
 }

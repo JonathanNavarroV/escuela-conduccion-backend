@@ -6,11 +6,15 @@ import {
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import * as bcrypt from "bcrypt";
-import { plainToInstance } from "class-transformer";
 import { MessageKeys } from "src/common/constants/message-keys.constant";
+import {
+	transformResponseArray,
+	transformResponseSingle,
+} from "src/common/helpers/transform-response.helper";
 import { Repository } from "typeorm";
 import { BranchesService } from "../branches/branches.service";
 import { Branch } from "../branches/entities/branch.entity";
+import { UserResponseDto } from "./dto/user-response.dto";
 import { CreateUserDto, UpdateUserDto } from "./dto/user.dto";
 import { User, UserRole } from "./entities/user.entity";
 
@@ -24,28 +28,32 @@ export class UsersService {
 	/**
 	 * Crea un nuevo usuario en la base de datos.
 	 *
+	 * Descripción detallada:
 	 * - Verifica si ya existe un usuario con el mismo email.
-	 * - Valida el rol del usuario y sus sedes (branches):
-	 *   - Si el rol es `SUPER_ADMIN`, no se deben asignar branches.
-	 *   - Si el rol es `BRANCH_ADMIN`, se deben asignar uno o más branches válidos.
-	 * - Valida la existencia de las sedes proporcionadas.
-	 * - Hashea la contraseña antes de guardar al usuario.
-	 * - Persiste el nuevo usuario en la base de datos.
-	 * - Devuelve una instancia de `User`, excluyendo la contraseña gracias al decorador `@Exclude`.
+	 * - Valida el rol del usuario y sus sedes (branches).
+	 *   - Un `SUPER_ADMIN` no debe tener branches.
+	 *   - Un `BRANCH_ADMIN` debe tener al menos un branch válido.
+	 * - Verifica la existencia de las sedes.
+	 * - Hashea la contraseña y guarda el nuevo usuario.
 	 *
-	 * @param createUserDto - Datos necesarios para crear el usuario: nombre, email, contraseña, rol y sedes.
-	 * @returns Una promesa que resuelve con el usuario creado (sin la contraseña).
+	 * @param {CreateUserDto} createUserDto - Datos necesarios para crear el usuario: nombre, email, contraseña, rol y sedes.
+	 *
+	 * @returns {Promise<UserResponseDto>} Usuario creado y transformado al DTO de respuesta.
 	 *
 	 * @throws {ConflictException} Si ya existe un usuario con el mismo email.
-	 * @throws {BadRequestException} Si el rol y las sedes están en conflicto:
-	 *   - `users.super_admin_should_not_have_branches` si se asignan branches a un `SUPER_ADMIN`.
-	 *   - `users.branch_admin_requires_branches` si no se asignan branches a un `BRANCH_ADMIN`.
-	 * @throws {NotFoundException} Si alguna de las sedes no existe.
+	 * @throws {BadRequestException} Si el rol y branches están mal definidos.
+	 * @throws {NotFoundException} Si alguna sede no existe.
+	 *
+	 * @example
+	 * const newUser = await usersService.create({ email: 'test@mail.com', ... });
+	 * console.log(user);
+	 *
+	 * @async
 	 */
-	public async create(createUserDto: CreateUserDto): Promise<User> {
+	public async create(createUserDto: CreateUserDto): Promise<UserResponseDto> {
 		const { email, password, role, branchIds } = createUserDto;
 
-		const userFound = await this.findOneByEmail(email);
+		const userFound = await this.findOneEntityByEmail(email);
 		if (!!userFound) {
 			throw new ConflictException({
 				messageKey: MessageKeys.USER.ALREADY_EXIST,
@@ -70,7 +78,7 @@ export class UsersService {
 
 			branches = await Promise.all(
 				createUserDto.branchIds.map((id) =>
-					this.branchesService.findOneById(id),
+					this.branchesService.findOneEntityById(id),
 				),
 			);
 		}
@@ -85,33 +93,53 @@ export class UsersService {
 		});
 		const savedUser = await this.userRepository.save(newUser);
 
-		// Convierte el objeto plano `savedUser` a una instancia de UserEntity, aplicando el decorado @Exclude para ocultar el campo password
-		return plainToInstance(User, savedUser);
+		return transformResponseSingle(UserResponseDto, savedUser);
 	}
 
 	/**
 	 * Retorna todos los usuarios registrados en la base de datos.
-	 * Los usuarios se retornan como instancias de UserEntity, excluyendo la contraseña.
 	 *
-	 * @returns Una promesa que resuelve con un arreglo de todos los usuarios sin la contraseña.
+	 * Descripción detallada:
+	 * - Se devuelven ordenados por estado activo (`isActive`).
+	 *
+	 * @returns {Promise<UserResponseDto[]>} Arreglo con todos los usuarios existentes en el sistema.
+	 *
+	 * @example
+	 * const users = await usersService.findAll();
+	 * console.log(usuarios);
+	 *
+	 * @async
 	 */
-	public async findAll(): Promise<User[]> {
+	public async findAll(): Promise<UserResponseDto[]> {
 		const users = await this.userRepository.find({
 			order: {
 				isActive: "DESC",
 			},
 		});
 
-		return plainToInstance(User, users);
+		return transformResponseArray(UserResponseDto, users);
 	}
 
 	/**
-	 * Busca usuarios cuyo nombre completo (nombre + apellidos) contiene el término de búsqueda, ignorando mayúsculas, minúsculas y tildes.
+	 * Busca usuarios por coincidencia parcial en su nombre completo.
 	 *
-	 * @param searchTerm - Texto parcial para buscar en el nombre completo.
-	 * @returns Una promesa que resuelve con un arreglo de usuarios que coinciden.
+	 * Descripción detallada:
+	 * - Combina nombre, apellido paterno y materno.
+	 * - Ignora mayúsculas, minúsculas y tildes mediante `COLLATE`.
+	 * - Ordena por estado activo y luego por nombre.
+	 *
+	 * @param {string} searchTerm - Texto parcial del nombre completo del usuario.
+	 *
+	 * @returns {Promise<UserResponseDto[]>} Arreglo con los usuarios que coinciden con el término.
+	 *
+	 * @example
+	 * const results = await usersService.searchByFullName("Carlos");
+	 *
+	 * @async
 	 */
-	public async searchByFullName(searchTerm: string): Promise<User[]> {
+	public async searchByFullName(
+		searchTerm: string,
+	): Promise<UserResponseDto[]> {
 		const usersFound = await this.userRepository
 			.createQueryBuilder("user")
 			.where(
@@ -122,19 +150,27 @@ export class UsersService {
 			.addOrderBy("user.firstName", "ASC")
 			.getMany();
 
-		return plainToInstance(User, usersFound);
+		return transformResponseArray(UserResponseDto, usersFound);
 	}
 
 	/**
-	 * Busca un usuario por su ID.
-	 * Si se encuentra, retorna el usuario como una instancia de UserEntity, excluyendo la contraseña.
+	 * Busca un usuario por su ID único.
 	 *
-	 * @param id - ID del usuario (UUID).
-	 * @returns Una promesa que resuelve con el usuario sin la contraseña.
+	 * Descripción detallada:
+	 * - Devuelve un usuario si existe, transformado a su DTO correspondiente.
 	 *
-	 * @throws {NotFoundException} Si no se encuentra un usuario con el ID proporcionado.
+	 * @param {string} id - Identificador UUID del usuario.
+	 *
+	 * @returns {Promise<UserResponseDto>} Usuario encontrado con sus datos visibles.
+	 *
+	 * @throws {NotFoundException} Si no se encuentra ningún usuario con el ID dado.
+	 *
+	 * @example
+	 * const user = await usersService.findOneById("123e4567-e89b-12d3-a456-426614174000");
+	 *
+	 * @async
 	 */
-	public async findOneById(id: string): Promise<User> {
+	public async findOneById(id: string): Promise<UserResponseDto> {
 		const userFound = await this.userRepository.findOne({
 			where: {
 				id,
@@ -144,16 +180,25 @@ export class UsersService {
 			throw new NotFoundException({ messageKey: MessageKeys.USER.NOT_FOUND });
 		}
 
-		return plainToInstance(User, userFound);
+		return transformResponseSingle(UserResponseDto, userFound);
 	}
 
 	/**
 	 * Busca un usuario por su correo electrónico.
 	 *
-	 * @param email - El correo electrónico del usuario a buscar.
-	 * @returns Una promesa que resuelve con el usuario si se encuentra, o `null` si no existe
+	 * Descripción detallada:
+	 * - Útil para validaciones como evitar duplicados o logins.
+	 *
+	 * @param {string} email - Correo electrónico del usuario a buscar.
+	 *
+	 * @returns {Promise<User | null>} Instancia de usuario si existe, o null.
+	 *
+	 * @example
+	 * const found = await usersService.findOneByEmail("mail@ejemplo.com");
+	 *
+	 * @async
 	 */
-	public async findOneByEmail(email: string): Promise<User> {
+	public async findOneEntityByEmail(email: string): Promise<User> {
 		return this.userRepository.findOne({
 			where: {
 				email,
@@ -164,24 +209,31 @@ export class UsersService {
 	/**
 	 * Actualiza los datos de un usuario existente.
 	 *
+	 * Descripción detallada:
 	 * - Verifica si el usuario existe.
-	 * - Valida que el nuevo email no esté registrado por otro usuario.
-	 * - Valida y asocia las nuevas sedes (branches) si se proporcionan, según el rol del usuario.
-	 *   - Un `branch_admin` debe tener al menos una sede asociada.
-	 *   - Un `super_admin` no debe tener sedes asociadas.
-	 * - Hashea la nueva contraseña si se proporciona.
-	 * - Reemplaza los datos del usuario existente con los nuevos.
+	 * - Si cambia el email, valida duplicidad.
+	 * - Aplica reglas de asignación de branches según el rol.
+	 * - Hashea la nueva contraseña si es proporcionada.
+	 * - Guarda los cambios y retorna el usuario actualizado.
 	 *
-	 * @param id - ID del usuario a actualizar.
-	 * @param updateUserDTO - Datos a actualizar, incluyendo opcionalmente una nueva contraseña y sedes.
-	 * @returns Una promesa con el usuario actualizado, sin la contraseña.
+	 * @param {string} id - ID del usuario a modificar.
+	 * @param {UpdateUserDto} updateUserDTO - Datos a actualizar (parciales).
+	 *
+	 * @returns {Promise<UserResponseDto>} Usuario actualizado y transformado al DTO.
 	 *
 	 * @throws {NotFoundException} Si el usuario no existe.
-	 * @throws {ConflictException} Si el nuevo email ya está en uso por otro usuario.
-	 * @throws {BadRequestException} Si las reglas de asociación de sedes no se cumplen según el rol.
-	 * @throws {NotFoundException} Si alguna de las sedes no existe.
+	 * @throws {ConflictException} Si el nuevo email ya está en uso.
+	 * @throws {BadRequestException} Si las reglas de branch según el rol no se cumplen.
+	 *
+	 * @example
+	 * const updatedUser = await usersService.update("uuid", { email: "nuevo@mail.com" });
+	 *
+	 * @async
 	 */
-	public async update(id: string, updateUserDTO: UpdateUserDto): Promise<User> {
+	public async update(
+		id: string,
+		updateUserDTO: UpdateUserDto,
+	): Promise<UserResponseDto> {
 		const { email, password, branchIds, ...rest } = updateUserDTO;
 
 		const userFound = await this.userRepository.findOne({
@@ -195,7 +247,7 @@ export class UsersService {
 
 		// Validación de email en uso
 		if (email && userFound.email !== email) {
-			const userEmailFound = await this.findOneByEmail(email);
+			const userEmailFound = await this.findOneEntityByEmail(email);
 			if (!!userEmailFound) {
 				throw new ConflictException({
 					messageKey: MessageKeys.USER.ALREADY_EXIST,
@@ -223,7 +275,7 @@ export class UsersService {
 			}
 
 			branches = await Promise.all(
-				branchIds.map((id) => this.branchesService.findOneById(id)),
+				branchIds.map((id) => this.branchesService.findOneEntityById(id)),
 			);
 		}
 
@@ -241,6 +293,6 @@ export class UsersService {
 
 		const updatedUser = await this.userRepository.save(userFound);
 
-		return plainToInstance(User, updatedUser);
+		return transformResponseSingle(UserResponseDto, updatedUser);
 	}
 }

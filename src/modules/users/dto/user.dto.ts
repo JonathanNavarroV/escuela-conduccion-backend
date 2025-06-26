@@ -4,7 +4,6 @@ import {
 	IsBoolean,
 	IsEmail,
 	IsEnum,
-	IsNotEmpty,
 	IsOptional,
 	IsString,
 	IsUrl,
@@ -15,47 +14,47 @@ import { UserRole } from "../entities/user.entity";
 
 export class CreateUserDto {
 	@IsString()
-	@IsNotEmpty()
 	@Length(1, 100)
 	@ApiProperty({
 		description: "Nombre del usuario.",
 		example: "Juan Carlos",
+		maxLength: 100,
 	})
 	public firstName: string;
 
 	@IsString()
-	@IsNotEmpty()
 	@Length(1, 50)
 	@ApiProperty({
 		description: "Apellido paterno del usuario.",
 		example: "Pérez",
+		maxLength: 50,
 	})
 	public lastNameFather: string;
 
 	@IsString()
-	@IsNotEmpty()
 	@Length(1, 50)
 	@ApiProperty({
 		description: "Apellido materno del usuario.",
 		example: "González",
+		maxLength: 50,
 	})
 	public lastNameMother: string;
 
 	@IsEmail()
-	@IsNotEmpty()
 	@Length(1, 255)
 	@ApiProperty({
 		description: "Correo electrónico del usuario.",
 		example: "juan.perez@ejemplo.com",
+		maxLength: 255,
 	})
 	public email: string;
 
 	@IsString()
-	@IsNotEmpty()
 	@Length(6, 255)
 	@ApiProperty({
 		description: "Contraseña del usuario (Mínimo 6 caracteres).",
 		example: "contraseña.segura.123",
+		maxLength: 255,
 	})
 	public password: string;
 
@@ -65,6 +64,7 @@ export class CreateUserDto {
 	@ApiProperty({
 		description: "URL de la foto de perfil.",
 		example: "https://ejemplo.com/juan.jpg",
+		maxLength: 255,
 		required: false,
 	})
 	public photo: string;
@@ -81,7 +81,7 @@ export class CreateUserDto {
 	@IsUUID(4, { each: true })
 	@ApiProperty({
 		description: "IDs de las sedes asociadas al usuario.",
-		example: ["ad3cc723-f6fe-4df6-9854-9439f3a85461"],
+		example: ["498E4141-8E06-4A31-864A-D6CCFC989E27"],
 	})
 	public branchIds: string[];
 }

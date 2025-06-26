@@ -2,10 +2,10 @@ import { Controller, Get, Param, ParseUUIDPipe } from "@nestjs/common";
 import { ApiOperation, ApiParam, ApiResponse } from "@nestjs/swagger";
 import { MessageKeys } from "src/common/constants/message-keys.constant";
 import { SuccessMessageKey } from "src/common/decorators/success-message.decorator";
-import { District } from "./entities/district.entity";
-import { LocationLevel } from "./entities/location-level.entity";
-import { Province } from "./entities/province.entity";
-import { Region } from "./entities/region.entity";
+import { DistrictResponseDto } from "./dto/district-response.dto";
+import { LocationLevelResponseDto } from "./dto/location-level-response.dto";
+import { ProvinceResponseDto } from "./dto/province-response.dto";
+import { RegionResponseDto } from "./dto/region-response.dto";
 import { LocationsService } from "./locations.service";
 
 @Controller("locations")
@@ -21,11 +21,11 @@ export class LocationsController {
 	@ApiResponse({
 		status: 200,
 		description: "Listado de niveles de localización obtenido correctamente.",
-		type: LocationLevel,
+		type: LocationLevelResponseDto,
 		isArray: true,
 	})
 	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
-	public findLocationLevels(): Promise<LocationLevel[]> {
+	public findLocationLevels(): Promise<LocationLevelResponseDto[]> {
 		return this.locationService.findLocationLevels();
 	}
 
@@ -38,11 +38,11 @@ export class LocationsController {
 	@ApiResponse({
 		status: 200,
 		description: "Listado de regions obtenido correctamente.",
-		type: Region,
+		type: RegionResponseDto,
 		isArray: true,
 	})
 	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
-	public findAllRegions(): Promise<Region[]> {
+	public findAllRegions(): Promise<RegionResponseDto[]> {
 		return this.locationService.findAllRegions();
 	}
 
@@ -55,11 +55,11 @@ export class LocationsController {
 	@ApiResponse({
 		status: 200,
 		description: "Listado de provincias obtenido correctamente.",
-		type: Region,
+		type: ProvinceResponseDto,
 		isArray: true,
 	})
 	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
-	public findAllProvinces(): Promise<Province[]> {
+	public findAllProvinces(): Promise<ProvinceResponseDto[]> {
 		return this.locationService.findAllProvinces();
 	}
 
@@ -77,13 +77,13 @@ export class LocationsController {
 	@ApiResponse({
 		status: 200,
 		description: "Listado de provincias obtenido correctamente.",
-		type: Province,
+		type: ProvinceResponseDto,
 		isArray: true,
 	})
 	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
 	public findProvincesByRegionId(
 		@Param("regionId", ParseUUIDPipe) regionId: string,
-	): Promise<Province[]> {
+	): Promise<ProvinceResponseDto[]> {
 		return this.locationService.findProvincesByRegionId(regionId);
 	}
 
@@ -101,13 +101,13 @@ export class LocationsController {
 	@ApiResponse({
 		status: 200,
 		description: "Listado de comunas obtenido correctamente.",
-		type: District,
+		type: DistrictResponseDto,
 		isArray: true,
 	})
 	@SuccessMessageKey(MessageKeys.COMMON.SUCCESS)
 	public findDistrictsByProvinceId(
 		@Param("provinceId", ParseUUIDPipe) provinceId: string,
-	): Promise<District[]> {
+	): Promise<DistrictResponseDto[]> {
 		return this.locationService.findDistrictsByProvinceId(provinceId);
 	}
 }

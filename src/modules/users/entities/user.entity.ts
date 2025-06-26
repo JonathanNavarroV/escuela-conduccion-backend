@@ -1,4 +1,3 @@
-import { Exclude } from "class-transformer";
 import { Branch } from "src/modules/branches/entities/branch.entity";
 import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
@@ -26,11 +25,10 @@ export class User {
 	public email: string;
 
 	@Column({ type: "varchar", length: 100 })
-	@Exclude()
 	public password: string;
 
 	@Column({ type: "varchar", length: 255, nullable: true })
-	public photo: string;
+	public photo: string | null;
 
 	@Column({ type: "varchar", length: 30, default: UserRole.BRANCH_ADMIN })
 	public role: UserRole;

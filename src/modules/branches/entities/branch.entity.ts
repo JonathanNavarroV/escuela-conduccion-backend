@@ -22,7 +22,7 @@ export class Branch {
 	public email: string;
 
 	@Column({ type: "varchar", length: 30, nullable: true })
-	public phone: string;
+	public phone: string | null;
 
 	@Column({ type: "varchar", length: 30 })
 	public mobile: string;
@@ -35,7 +35,7 @@ export class Branch {
 	public district: District;
 
 	@Column({ type: "uniqueidentifier" })
-	public districtId;
+	public districtId: string;
 
 	@Column({ type: "bit", default: true })
 	public isActive: boolean;
