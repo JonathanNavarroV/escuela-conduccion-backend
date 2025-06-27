@@ -13,6 +13,24 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, any> {
 		private reflector: Reflector, // Se inyecta el reflector para poder leer la metadata
 	) {}
 
+	/**
+	 * Intercepta la respuesta HTTP para envolverla en un objeto con mensaje, código de estado y datos.
+	 *
+	 * Descripción detallada:
+	 * - Obtiene el objeto response del contexto HTTP.
+	 * - Extrae un mensaje de éxito desde la metadata si está definido en el handler.
+	 * - Intercepta la respuesta del siguiente handler en la cadena.
+	 * - Envuelve la respuesta original en un objeto que incluye:
+	 *    - `messageKey`: clave del mensaje de éxito (o undefined si no existe).
+	 *    - `statusCode`: código HTTP de la respuesta.
+	 *    - `data`: datos originales de la respuesta o `null` si no hay datos.
+	 * - Facilita respuestas uniformes con mensajes y estructura consistente para el frontend.
+	 *
+	 * @param {ExecutionContext} context - Contexto de ejecución del interceptor.
+	 * @param {CallHandler} next - Handler siguiente en la cadena de interceptores.
+	 *
+	 * @returns {Observable<any>} Observable que emite la respuesta interceptada y modificada.
+	 */
 	public intercept(
 		context: ExecutionContext,
 		next: CallHandler,

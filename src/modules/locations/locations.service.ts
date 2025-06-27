@@ -27,20 +27,18 @@ export class LocationsService {
 	) {}
 
 	/**
-	 * Obtiene los niveles de localización asociados al país definido por `SCHOOL_COUNTRY`.
+	 * Obtiene los niveles de localización asociados al país configurado en la variable de entorno.
 	 *
 	 * Descripción detallada:
-	 * - Busca el país configurado en la variable de entorno `SCHOOL_COUNTRY`.
-	 * - Si el país no existe, lanza un error 404.
-	 * - Si se encuentra, retorna los niveles de localización asociados.
+	 * - Lee el nombre del país desde la variable de entorno `SCHOOL_COUNTRY`.
+	 * - Busca la entidad país correspondiente al nombre obtenido.
+	 * - Si no encuentra el país, lanza NotFoundException.
+	 * - Consulta los niveles de localización (location levels) asociados al ID del país encontrado.
+	 * - Transforma y retorna los resultados como un array de LocationLevelResponseDto.
 	 *
-	 * @returns {Promise<LocationLevelResponseDto[]>} Arreglo de niveles de localización como DTOs.
+	 * @returns {Promise<LocationLevelResponseDto[]>} Array con los niveles de localización transformados.
 	 *
-	 * @throws {NotFoundException} Si no se encuentra el país.
-	 *
-	 * @example
-	 * const levels = await service.findLocationLevels();
-	 * console.log(levels);
+	 * @throws {NotFoundException} Cuando no se encuentra el país configurado.
 	 *
 	 * @async
 	 */
@@ -65,15 +63,16 @@ export class LocationsService {
 	}
 
 	/**
-	 * Obtiene todas las regiones del país definido por `SCHOOL_COUNTRY`.
+	 * Obtiene todas las regiones asociadas al país configurado en la variable de entorno.
 	 *
 	 * Descripción detallada:
-	 * - Si no se encuentra el país, retorna un arreglo vacío.
+	 * - Lee el nombre del país desde la variable de entorno `SCHOOL_COUNTRY`.
+	 * - Busca la entidad país correspondiente al nombre obtenido.
+	 * - Si no encuentra el país, retorna un arreglo vacío.
+	 * - Consulta las regiones asociadas a ese país, ordenadas alfabéticamente por nombre.
+	 * - Transforma y retorna las regiones como un array de RegionResponseDto.
 	 *
-	 * @returns {Promise<RegionResponseDto[]>} Arreglo de regiones como DTOs.
-	 *
-	 * @example
-	 * const regions = await service.findAllRegions();
+	 * @returns {Promise<RegionResponseDto[]>} Array con las regiones transformadas o vacío si no se encuentra el país.
 	 *
 	 * @async
 	 */
@@ -99,15 +98,16 @@ export class LocationsService {
 	}
 
 	/**
-	 * Obtiene todas las provincias del país definido por `SCHOOL_COUNTRY`.
+	 * Obtiene todas las provincias asociadas al país configurado en la variable de entorno.
 	 *
 	 * Descripción detallada:
-	 * - Si no se encuentra el país, retorna un arreglo vacío.
+	 * - Lee el nombre del país desde la variable de entorno `SCHOOL_COUNTRY`.
+	 * - Busca la entidad país correspondiente al nombre obtenido.
+	 * - Si no encuentra el país, retorna un arreglo vacío.
+	 * - Consulta las provincias asociadas a ese país, ordenadas alfabéticamente por nombre.
+	 * - Transforma y retorna las provincias como un array de ProvinceResponseDto.
 	 *
-	 * @returns {Promise<ProvinceResponseDto[]>} Arreglo de provincias como DTOs.
-	 *
-	 * @example
-	 * const provinces = await service.findAllProvinces();
+	 * @returns {Promise<ProvinceResponseDto[]>} Array con las provincias transformadas o vacío si no se encuentra el país.
 	 *
 	 * @async
 	 */
@@ -133,16 +133,16 @@ export class LocationsService {
 	}
 
 	/**
-	 * Obtiene todas las provincias pertenecientes a una región.
+	 * Obtiene las provincias asociadas a una región específica.
 	 *
 	 * Descripción detallada:
-	 * - Realiza la búsqueda filtrando por `regionId`.
+	 * - Consulta las provincias filtrando por el ID de la región proporcionada.
+	 * - Ordena los resultados alfabéticamente por nombre.
+	 * - Transforma y retorna las provincias como un array de ProvinceResponseDto.
 	 *
-	 * @param {string} regionId - ID de la región.
-	 * @returns {Promise<ProvinceResponseDto[]>} Arreglo de provincias como DTOs.
+	 * @param {string} regionId - ID de la región para filtrar las provincias.
 	 *
-	 * @example
-	 * const provinces = await service.findProvincesByRegionId('uuid-region');
+	 * @returns {Promise<ProvinceResponseDto[]>} Array con las provincias transformadas.
 	 *
 	 * @async
 	 */
@@ -162,16 +162,16 @@ export class LocationsService {
 	}
 
 	/**
-	 * Obtiene todas las comunas pertenecientes a una provincia.
+	 * Obtiene los distritos asociados a una provincia específica.
 	 *
 	 * Descripción detallada:
-	 * - Realiza la búsqueda filtrando por `provinceId`.
+	 * - Consulta los distritos filtrando por el ID de la provincia proporcionada.
+	 * - Ordena los resultados alfabéticamente por nombre.
+	 * - Transforma y retorna los distritos como un array de DistrictResponseDto.
 	 *
-	 * @param {string} provinceId - ID de la provincia.
-	 * @returns {Promise<DistrictResponseDto[]>} Arreglo de comunas como DTOs.
+	 * @param {string} provinceId - ID de la provincia para filtrar los distritos.
 	 *
-	 * @example
-	 * const districts = await service.findDistrictsByProvinceId('uuid-province');
+	 * @returns {Promise<DistrictResponseDto[]>} Array con los distritos transformados.
 	 *
 	 * @async
 	 */
@@ -191,17 +191,15 @@ export class LocationsService {
 	}
 
 	/**
-	 * Busca una comuna por su ID.
+	 * Busca una entidad distrito por su ID.
 	 *
 	 * Descripción detallada:
-	 * - Devuelve el objeto District si se encuentra o `null` en caso contrario.
+	 * - Consulta la base de datos para encontrar un distrito con el ID proporcionado.
+	 * - Retorna la entidad District o `undefined` si no existe.
 	 *
-	 * @param {string} districtId - ID de la comuna (UUID).
-	 * @returns {Promise<District | null>} Objeto de la entidad o null.
+	 * @param {string} districtId - ID del distrito a buscar.
 	 *
-	 * @example
-	 * const district = await service.findDistrictEntityById('uuid');
-	 * console.log(district?.name);
+	 * @returns {Promise<District | undefined>} Entidad District encontrada o undefined.
 	 *
 	 * @async
 	 */
@@ -214,16 +212,15 @@ export class LocationsService {
 	}
 
 	/**
-	 * Busca un país por su nombre exacto.
+	 * Busca una entidad país por su nombre.
 	 *
 	 * Descripción detallada:
-	 * - Si no se encuentra un país con ese nombre, retorna null.
+	 * - Realiza una consulta para encontrar un país cuyo nombre coincida exactamente.
+	 * - Retorna la entidad Country si se encuentra, o `undefined` si no existe.
 	 *
-	 * @param {string} countryName - Nombre del país.
-	 * @returns {Promise<Country | null>} Entidad `Country` o null.
+	 * @param {string} countryName - Nombre del país a buscar.
 	 *
-	 * @example
-	 * const country = await service.findCountryEntityByName("Chile");
+	 * @returns {Promise<Country | undefined>} Entidad Country encontrada o undefined.
 	 *
 	 * @async
 	 */

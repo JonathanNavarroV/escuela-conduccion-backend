@@ -26,27 +26,24 @@ export class UsersService {
 	) {}
 
 	/**
-	 * Crea un nuevo usuario en la base de datos.
+	 * Crea un nuevo usuario en el sistema validando su rol y asignación de sucursales.
 	 *
 	 * Descripción detallada:
-	 * - Verifica si ya existe un usuario con el mismo email.
-	 * - Valida el rol del usuario y sus sedes (branches).
-	 *   - Un `SUPER_ADMIN` no debe tener branches.
-	 *   - Un `BRANCH_ADMIN` debe tener al menos un branch válido.
-	 * - Verifica la existencia de las sedes.
-	 * - Hashea la contraseña y guarda el nuevo usuario.
+	 * - Verifica si ya existe un usuario con el email proporcionado; si es así, lanza ConflictException.
+	 * - Según el rol:
+	 *   - Si es SUPER_ADMIN, valida que no se asignen sucursales (branchIds debe estar vacío o undefined).
+	 *   - Si es BRANCH_ADMIN, valida que se asignen sucursales y obtiene sus entidades correspondientes.
+	 * - Hashea la contraseña usando bcrypt con un salt de 10.
+	 * - Crea la entidad usuario con los datos, la contraseña hasheada y las sucursales asignadas.
+	 * - Guarda el usuario en la base de datos.
+	 * - Retorna la respuesta transformada a UserResponseDto para exponer solo los datos necesarios.
 	 *
-	 * @param {CreateUserDto} createUserDto - Datos necesarios para crear el usuario: nombre, email, contraseña, rol y sedes.
+	 * @param {CreateUserDto} createUserDto - DTO con los datos para crear el usuario, incluyendo email, password, rol y sucursales.
 	 *
-	 * @returns {Promise<UserResponseDto>} Usuario creado y transformado al DTO de respuesta.
+	 * @returns {Promise<UserResponseDto>} DTO con los datos del usuario creado.
 	 *
-	 * @throws {ConflictException} Si ya existe un usuario con el mismo email.
-	 * @throws {BadRequestException} Si el rol y branches están mal definidos.
-	 * @throws {NotFoundException} Si alguna sede no existe.
-	 *
-	 * @example
-	 * const newUser = await usersService.create({ email: 'test@mail.com', ... });
-	 * console.log(user);
+	 * @throws {ConflictException} Cuando ya existe un usuario con el mismo email.
+	 * @throws {BadRequestException} Cuando un SUPER_ADMIN tiene sucursales asignadas o un BRANCH_ADMIN no tiene sucursales.
 	 *
 	 * @async
 	 */
@@ -97,16 +94,14 @@ export class UsersService {
 	}
 
 	/**
-	 * Retorna todos los usuarios registrados en la base de datos.
+	 * Obtiene todos los usuarios ordenados por estado activo de forma descendente.
 	 *
 	 * Descripción detallada:
-	 * - Se devuelven ordenados por estado activo (`isActive`).
+	 * - Consulta todos los usuarios en la base de datos.
+	 * - Ordena los resultados para que los usuarios activos aparezcan primero.
+	 * - Transforma el resultado en un array de UserResponseDto para exponer solo los campos necesarios.
 	 *
-	 * @returns {Promise<UserResponseDto[]>} Arreglo con todos los usuarios existentes en el sistema.
-	 *
-	 * @example
-	 * const users = await usersService.findAll();
-	 * console.log(usuarios);
+	 * @returns {Promise<UserResponseDto[]>} Array con los usuarios transformados en DTOs.
 	 *
 	 * @async
 	 */
@@ -121,19 +116,18 @@ export class UsersService {
 	}
 
 	/**
-	 * Busca usuarios por coincidencia parcial en su nombre completo.
+	 * Busca usuarios cuyo nombre completo coincida parcialmente con el término de búsqueda.
 	 *
 	 * Descripción detallada:
-	 * - Combina nombre, apellido paterno y materno.
-	 * - Ignora mayúsculas, minúsculas y tildes mediante `COLLATE`.
-	 * - Ordena por estado activo y luego por nombre.
+	 * - Construye una consulta que concatena el primer nombre y ambos apellidos.
+	 * - Realiza una búsqueda insensible a mayúsculas, acentos y ordenamiento (COLLATE Latin1_General_CI_AI).
+	 * - Filtra usuarios cuyo nombre completo contenga el término proporcionado.
+	 * - Ordena los resultados primero por usuarios activos (descendente) y luego por nombre (ascendente).
+	 * - Transforma el resultado en un array de UserResponseDto para exponer solo los campos necesarios.
 	 *
-	 * @param {string} searchTerm - Texto parcial del nombre completo del usuario.
+	 * @param {string} searchTerm - Texto para buscar dentro del nombre completo del usuario.
 	 *
-	 * @returns {Promise<UserResponseDto[]>} Arreglo con los usuarios que coinciden con el término.
-	 *
-	 * @example
-	 * const results = await usersService.searchByFullName("Carlos");
+	 * @returns {Promise<UserResponseDto[]>} Array con los usuarios encontrados transformados en DTOs.
 	 *
 	 * @async
 	 */
@@ -154,19 +148,18 @@ export class UsersService {
 	}
 
 	/**
-	 * Busca un usuario por su ID único.
+	 * Busca un usuario por su ID y retorna su información transformada.
 	 *
 	 * Descripción detallada:
-	 * - Devuelve un usuario si existe, transformado a su DTO correspondiente.
+	 * - Consulta la base de datos para encontrar un usuario con el ID proporcionado.
+	 * - Si no se encuentra, lanza una NotFoundException con un mensaje específico.
+	 * - Si se encuentra, transforma la entidad a UserResponseDto para exponer solo los datos necesarios.
 	 *
-	 * @param {string} id - Identificador UUID del usuario.
+	 * @param {string} id - Identificador único del usuario a buscar.
 	 *
-	 * @returns {Promise<UserResponseDto>} Usuario encontrado con sus datos visibles.
+	 * @returns {Promise<UserResponseDto>} DTO con los datos del usuario encontrado.
 	 *
-	 * @throws {NotFoundException} Si no se encuentra ningún usuario con el ID dado.
-	 *
-	 * @example
-	 * const user = await usersService.findOneById("123e4567-e89b-12d3-a456-426614174000");
+	 * @throws {NotFoundException} Cuando no existe un usuario con el ID proporcionado.
 	 *
 	 * @async
 	 */
@@ -184,17 +177,15 @@ export class UsersService {
 	}
 
 	/**
-	 * Busca un usuario por su correo electrónico.
+	 * Busca un usuario por su email y retorna la entidad completa.
 	 *
 	 * Descripción detallada:
-	 * - Útil para validaciones como evitar duplicados o logins.
+	 * - Consulta la base de datos para encontrar un usuario con el email proporcionado.
+	 * - Retorna la entidad User completa o `undefined` si no existe.
 	 *
-	 * @param {string} email - Correo electrónico del usuario a buscar.
+	 * @param {string} email - Email del usuario a buscar.
 	 *
-	 * @returns {Promise<User | null>} Instancia de usuario si existe, o null.
-	 *
-	 * @example
-	 * const found = await usersService.findOneByEmail("mail@ejemplo.com");
+	 * @returns {Promise<User | undefined>} Entidad User encontrada o undefined si no existe.
 	 *
 	 * @async
 	 */
@@ -207,26 +198,26 @@ export class UsersService {
 	}
 
 	/**
-	 * Actualiza los datos de un usuario existente.
+	 * Actualiza los datos de un usuario existente, incluyendo validaciones por rol y manejo de sucursales.
 	 *
 	 * Descripción detallada:
-	 * - Verifica si el usuario existe.
-	 * - Si cambia el email, valida duplicidad.
-	 * - Aplica reglas de asignación de branches según el rol.
-	 * - Hashea la nueva contraseña si es proporcionada.
-	 * - Guarda los cambios y retorna el usuario actualizado.
+	 * - Busca al usuario por ID; si no existe, lanza NotFoundException.
+	 * - Si se proporciona un nuevo email distinto al actual, valida que no esté en uso; si está, lanza ConflictException.
+	 * - Valida la asignación de sucursales según el rol actual:
+	 *   - BRANCH_ADMIN debe tener al menos una sucursal asignada.
+	 *   - SUPER_ADMIN no debe tener sucursales asignadas.
+	 * - Si se envía contraseña nueva, la hashea antes de guardarla.
+	 * - Actualiza los demás campos del usuario con los datos recibidos.
+	 * - Guarda y retorna el usuario actualizado transformado a UserResponseDto.
 	 *
-	 * @param {string} id - ID del usuario a modificar.
-	 * @param {UpdateUserDto} updateUserDTO - Datos a actualizar (parciales).
+	 * @param {string} id - ID del usuario a actualizar.
+	 * @param {UpdateUserDto} updateUserDTO - DTO con los datos para actualizar del usuario.
 	 *
-	 * @returns {Promise<UserResponseDto>} Usuario actualizado y transformado al DTO.
+	 * @returns {Promise<UserResponseDto>} DTO con los datos del usuario actualizado.
 	 *
-	 * @throws {NotFoundException} Si el usuario no existe.
-	 * @throws {ConflictException} Si el nuevo email ya está en uso.
-	 * @throws {BadRequestException} Si las reglas de branch según el rol no se cumplen.
-	 *
-	 * @example
-	 * const updatedUser = await usersService.update("uuid", { email: "nuevo@mail.com" });
+	 * @throws {NotFoundException} Cuando no se encuentra el usuario por ID.
+	 * @throws {ConflictException} Cuando el nuevo email ya está en uso por otro usuario.
+	 * @throws {BadRequestException} Cuando las sucursales asignadas no cumplen con las reglas del rol.
 	 *
 	 * @async
 	 */

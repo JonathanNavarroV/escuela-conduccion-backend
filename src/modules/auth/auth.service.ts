@@ -12,13 +12,23 @@ export class AuthService {
 	) {}
 
 	/**
-	 * Autentica a un usuario y retorna un token JWT si las credenciales son válidas.
-	 * Compara la contraseña ingresada con el hash almacenado usando bcrypt.
+	 * Autentica a un usuario con su email y contraseña, y genera un token JWT.
 	 *
-	 * @param email - Correo electrónico del usuario.
-	 * @param password - Contraseña del usuario en texto plano.
-	 * @returns Un objeto con el token de acceso JWT generado.
-	 * @throws {UnauthorizedException} Si las credenciales son inválidas. Por razones de seguridad, no se especifica si el error es por correo inexistente o la contraseña incorrecta.
+	 * Descripción detallada:
+	 * - Busca al usuario en la base de datos mediante el email proporcionado.
+	 * - Compara la contraseña ingresada con la almacenada usando bcrypt.
+	 * - Si el usuario no existe o la contraseña es incorrecta, lanza UnauthorizedException con un mensaje específico.
+	 * - Si la autenticación es exitosa, crea un payload con el ID y email del usuario.
+	 * - Genera un token JWT firmado asíncronamente con el payload y lo retorna.
+	 *
+	 * @param {string} email - Email del usuario que intenta autenticarse.
+	 * @param {string} password - Contraseña en texto plano para validar.
+	 *
+	 * @returns {Promise<{ access_token: string }>} Objeto con el token de acceso JWT generado.
+	 *
+	 * @throws {UnauthorizedException} Cuando el email no existe o la contraseña no coincide.
+	 *
+	 * @async
 	 */
 	public async signIn(
 		email: string,

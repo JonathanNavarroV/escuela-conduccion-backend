@@ -23,22 +23,21 @@ export class BranchesService {
 	) {}
 
 	/**
-	 * Crea una nueva sede en la base de datos.
+	 * Crea una nueva sucursal validando que no exista previamente y que el distrito asignado sea válido.
 	 *
-	 * - Verifica si ya existe una sede con el mismo nombre antes de crearla.
-	 * - Valida que la comuna asociada exista.
-	 * - Guarda la nueva sede en la base de datos.
-	 * - Retorna la sede creada como una instancia de BranchResponseDto.
+	 * Descripción detallada:
+	 * - Verifica si ya existe una sucursal con el mismo nombre; si es así, lanza ConflictException.
+	 * - Verifica que el distrito indicado exista; si no, lanza NotFoundException.
+	 * - Crea la entidad sucursal con los datos proporcionados.
+	 * - Guarda la nueva sucursal en la base de datos.
+	 * - Retorna la sucursal creada transformada a BranchResponseDto para exponer solo los datos necesarios.
 	 *
-	 * @param {CreateBranchDto} createBranchDto - Datos necesarios para crear la sede.
-	 * @returns {Promise<BranchResponseDto>} Promesa que resuelve con la sede creada.
+	 * @param {CreateBranchDto} createBranchDto - DTO con los datos para crear la sucursal.
 	 *
-	 * @throws {ConflictException} Si el nombre ya está registrado.
-	 * @throws {NotFoundException} Si la comuna asociada no existe.
+	 * @returns {Promise<BranchResponseDto>} DTO con los datos de la sucursal creada.
 	 *
-	 * @example
-	 * const newBranch = await branchesService.create(createBranchDto);
-	 * console.log(newBranch.id);
+	 * @throws {ConflictException} Cuando ya existe una sucursal con el mismo nombre.
+	 * @throws {NotFoundException} Cuando no se encuentra el distrito asignado.
 	 *
 	 * @async
 	 */
@@ -68,16 +67,14 @@ export class BranchesService {
 	}
 
 	/**
-	 * Obtiene todas las sedes registradas.
+	 * Obtiene todas las sedes ordenadas por estado activo de forma descendente.
 	 *
-	 * - Las sedes se ordenan primero por estado activo (`isActive` DESC).
-	 * - Retorna un arreglo de BranchResponseDto con las sedes encontradas.
+	 * Descripción detallada:
+	 * - Consulta todas las sedes en la base de datos.
+	 * - Ordena los resultados para que las sedes activas aparezcan primero.
+	 * - Transforma el resultado en un array de BranchResponseDto para exponer solo los campos necesarios.
 	 *
-	 * @returns {Promise<BranchResponseDto[]>} Promesa que resuelve con un arreglo de sedes.
-	 *
-	 * @example
-	 * const branches = await branchesService.findAll();
-	 * console.log(branches.length);
+	 * @returns {Promise<BranchResponseDto[]>} Array con las sedes transformadas en DTOs.
 	 *
 	 * @async
 	 */
@@ -92,16 +89,17 @@ export class BranchesService {
 	}
 
 	/**
-	 * Busca sedes cuyo nombre contiene el término de búsqueda ignorando mayúsculas y tildes.
+	 * Busca sedes cuyo nombre coincida parcialmente con el término de búsqueda.
 	 *
-	 * - El resultado se ordena por `isActive` descendente y nombre ascendente.
+	 * Descripción detallada:
+	 * - Realiza una búsqueda insensible a mayúsculas, acentos y ordenamiento (COLLATE Latin1_General_CI_AI).
+	 * - Filtra sedes cuyo nombre contenga el término proporcionado.
+	 * - Ordena los resultados primero por sedes activas (descendente) y luego por nombre (ascendente).
+	 * - Transforma el resultado en un array de BranchResponseDto para exponer solo los campos necesarios.
 	 *
-	 * @param {string} searchTerm - Texto parcial para buscar el nombre.
-	 * @returns {Promise<BranchResponseDto[]>} Promesa con arreglo de sedes que coinciden.
+	 * @param {string} searchTerm - Texto para buscar dentro del nombre completo de la sede.
 	 *
-	 * @example
-	 * const matches = await branchesService.searchByName("maipú");
-	 * console.log(matches);
+	 * @returns {Promise<BranchResponseDto[]>} Array con los sedes encontradas transformados en DTOs.
 	 *
 	 * @async
 	 */
@@ -119,18 +117,18 @@ export class BranchesService {
 	}
 
 	/**
-	 * Busca una sede por su ID.
+	 * Busca una sede por su ID y retorna su información transformada.
 	 *
-	 * - Si se encuentra, retorna la sede como una instancia de BranchResponseDto.
+	 * Descripción detallada:
+	 * - Consulta la base de datos para encontrar una sede con el ID proporcionado.
+	 * - Si no se encuentra, lanza una NotFoundException con un mensaje específico.
+	 * - Si se encuentra, transforma la entidad a BranchResponseDto para exponer solo los datos necesarios.
 	 *
-	 * @param {string} id - ID de la sede (UUID).
-	 * @returns {Promise<BranchResponseDto>} Promesa que resuelve con la sede encontrada.
+	 * @param {string} id - Identificador único de la sede a buscar.
 	 *
-	 * @throws {NotFoundException} Si no existe una sede con el ID proporcionado.
+	 * @returns {Promise<BranchResponseDto>} DTO con los datos de la sede encontrada.
 	 *
-	 * @example
-	 * const branch = await branchesService.findOneById("uuid-branch-id");
-	 * console.log(branch.name);
+	 * @throws {NotFoundException} Cuando no existe una sede con el ID proporcionado.
 	 *
 	 * @async
 	 */
@@ -148,16 +146,18 @@ export class BranchesService {
 	}
 
 	/**
-	 * Busca una entidad de sede por su ID sin transformación a DTO.
+	 * Busca una sucursal por su ID y retorna la entidad completa.
 	 *
-	 * @param {string} id - ID de la sede (UUID).
-	 * @returns {Promise<Branch>} Promesa que resuelve con la entidad Branch.
+	 * Descripción detallada:
+	 * - Consulta la base de datos para encontrar una sucursal con el ID proporcionado.
+	 * - Si no se encuentra, lanza NotFoundException con un mensaje específico.
+	 * - Si se encuentra, retorna la entidad Branch completa.
 	 *
-	 * @throws {NotFoundException} Si no existe una sede con el ID proporcionado.
+	 * @param {string} id - Identificador único de la sucursal a buscar.
 	 *
-	 * @example
-	 * const branchEntity = await branchesService.findOneEntityById("uuid-branch-id");
-	 * console.log(branchEntity.name);
+	 * @returns {Promise<Branch>} Entidad Branch encontrada.
+	 *
+	 * @throws {NotFoundException} Cuando no existe una sucursal con el ID proporcionado.
 	 *
 	 * @async
 	 */
@@ -175,16 +175,15 @@ export class BranchesService {
 	}
 
 	/**
-	 * Busca una sede por su nombre.
+	 * Busca una sucursal por su nombre y retorna la entidad correspondiente.
 	 *
-	 * @param {string} name - Nombre de la sede.
-	 * @returns {Promise<BranchResponseDto | null>} Promesa que resuelve con la sede o null si no existe.
+	 * Descripción detallada:
+	 * - Realiza una consulta para encontrar una sucursal cuyo nombre coincida exactamente.
+	 * - Retorna la entidad BranchResponseDto si se encuentra, o undefined si no existe.
 	 *
-	 * @example
-	 * const branch = await branchesService.findOneByName("Maipú");
-	 * if (branch) {
-	 *   console.log(branch.name);
-	 * }
+	 * @param {string} name - Nombre de la sucursal a buscar.
+	 *
+	 * @returns {Promise<BranchResponseDto | undefined>} Entidad BranchResponseDto encontrada o undefined.
 	 *
 	 * @async
 	 */
@@ -197,23 +196,21 @@ export class BranchesService {
 	}
 
 	/**
-	 * Actualiza los datos de una sede existente.
+	 * Actualiza los datos de una sucursal existente validando el nombre para evitar duplicados.
 	 *
-	 * - Verifica que la sede exista.
-	 * - Valida que el nuevo nombre no esté en uso por otra sede.
-	 * - Actualiza y guarda los nuevos datos.
-	 * - Retorna la entidad actualizada sin transformación.
+	 * Descripción detallada:
+	 * - Busca la sucursal por ID; si no existe, lanza NotFoundException.
+	 * - Si se proporciona un nuevo nombre distinto al actual, verifica que no esté en uso por otra sucursal; si está en uso, lanza ConflictException.
+	 * - Actualiza los demás campos de la sucursal con los datos proporcionados.
+	 * - Guarda y retorna la sucursal actualizada transformada a BranchResponseDto.
 	 *
-	 * @param {string} id - ID de la sede a actualizar.
-	 * @param {UpdateBranchDto} updateBranchDto - Datos para actualizar.
-	 * @returns {Promise<BranchResponseDto>} Promesa con la sede actualizada.
+	 * @param {string} id - ID de la sucursal a actualizar.
+	 * @param {UpdateBranchDto} updateBranchDto - DTO con los datos para actualizar la sucursal.
 	 *
-	 * @throws {NotFoundException} Si no se encuentra la sede.
-	 * @throws {ConflictException} Si el nombre ya está en uso por otra sede.
+	 * @returns {Promise<BranchResponseDto>} DTO con los datos de la sucursal actualizada.
 	 *
-	 * @example
-	 * const updatedBranch = await branchesService.update(id, updateBranchDto);
-	 * console.log(updatedBranch.name);
+	 * @throws {NotFoundException} Cuando no se encuentra la sucursal por ID.
+	 * @throws {ConflictException} Cuando el nuevo nombre ya está en uso por otra sucursal.
 	 *
 	 * @async
 	 */
