@@ -66,7 +66,7 @@ export class UserResponseDto {
 		description: "IDs de las sedes asociadas al usuario.",
 		example: ["812B468B-01C7-42C7-84C4-96A339BC3A1C"],
 	})
-	@Expose()
 	@Transform(({ obj }) => obj.branches?.map((branch) => branch.id) ?? [])
+	@Expose()
 	public branchIds: string[];
 }

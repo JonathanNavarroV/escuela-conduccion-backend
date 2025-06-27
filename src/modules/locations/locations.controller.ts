@@ -72,7 +72,7 @@ export class LocationsController {
 	@ApiParam({
 		name: "regionId",
 		description: "ID de la región (UUID)",
-		example: "3CAECADA-773C-4094-A744-F2AB7C9A5493",
+		example: "8040D5D2-2985-45FF-AC4F-764AE4A50648",
 	})
 	@ApiResponse({
 		status: 200,
@@ -96,7 +96,7 @@ export class LocationsController {
 	@ApiParam({
 		name: "provinceId",
 		description: "ID de la provincia (UUID)",
-		example: "3356CED6-D7DD-4DDB-8FC4-9654571FF007",
+		example: "90C73D90-02D7-4E85-A3F0-4DB78BC42DFC",
 	})
 	@ApiResponse({
 		status: 200,

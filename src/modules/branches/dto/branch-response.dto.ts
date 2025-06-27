@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Expose } from "class-transformer";
+import { Expose, Type } from "class-transformer";
+import { DistrictResponseDto } from "src/modules/locations/dto/district-response.dto";
 
 export class BranchResponseDto {
 	@ApiProperty({
@@ -45,11 +46,11 @@ export class BranchResponseDto {
 	public address: string;
 
 	@ApiProperty({
-		description: "ID de la comuna donde se ubica la sede.",
-		example: "F420267D-CD89-40E2-896F-5520E09D3F4B",
+		description: "Comuna donde se ubica la sede.",
 	})
+	@Type(() => DistrictResponseDto)
 	@Expose()
-	public districtId: string;
+	public district: DistrictResponseDto;
 
 	@ApiProperty({
 		description: "Indica si la sede está activa o no.",

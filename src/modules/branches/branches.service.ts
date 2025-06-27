@@ -28,13 +28,13 @@ export class BranchesService {
 	 * Descripción detallada:
 	 * - Verifica si ya existe una sucursal con el mismo nombre; si es así, lanza ConflictException.
 	 * - Verifica que el distrito indicado exista; si no, lanza NotFoundException.
-	 * - Crea la entidad sucursal con los datos proporcionados.
-	 * - Guarda la nueva sucursal en la base de datos.
-	 * - Retorna la sucursal creada transformada a BranchResponseDto para exponer solo los datos necesarios.
+	 * - Crea la entidad sucursal con los datos proporcionados y la guarda en la base de datos.
+	 * - Vuelve a consultar la sucursal creada incluyendo la relación con el distrito.
+	 * - Retorna la sucursal transformada a BranchResponseDto para exponer solo los datos necesarios.
 	 *
 	 * @param {CreateBranchDto} createBranchDto - DTO con los datos para crear la sucursal.
 	 *
-	 * @returns {Promise<BranchResponseDto>} DTO con los datos de la sucursal creada.
+	 * @returns {Promise<BranchResponseDto>} DTO con los datos de la sucursal creada, incluyendo su distrito.
 	 *
 	 * @throws {ConflictException} Cuando ya existe una sucursal con el mismo nombre.
 	 * @throws {NotFoundException} Cuando no se encuentra el distrito asignado.
@@ -63,7 +63,13 @@ export class BranchesService {
 		const newBranch = this.branchRepository.create(createBranchDto);
 		const savedBranch = await this.branchRepository.save(newBranch);
 
-		return transformResponseSingle(BranchResponseDto, savedBranch);
+		// Buscar la sede y agregar la relación
+		const savedWithRelations = await this.branchRepository.findOne({
+			relations: ["district"],
+			where: { id: savedBranch.id },
+		});
+
+		return transformResponseSingle(BranchResponseDto, savedWithRelations);
 	}
 
 	/**
@@ -71,6 +77,7 @@ export class BranchesService {
 	 *
 	 * Descripción detallada:
 	 * - Consulta todas las sedes en la base de datos.
+	 * - Incluye la relación con el distrito (`district`) en cada sede.
 	 * - Ordena los resultados para que las sedes activas aparezcan primero.
 	 * - Transforma el resultado en un array de BranchResponseDto para exponer solo los campos necesarios.
 	 *
@@ -80,6 +87,7 @@ export class BranchesService {
 	 */
 	public async findAll(): Promise<BranchResponseDto[]> {
 		const branches = await this.branchRepository.find({
+			relations: ["district"],
 			order: {
 				isActive: "DESC",
 			},
@@ -94,18 +102,20 @@ export class BranchesService {
 	 * Descripción detallada:
 	 * - Realiza una búsqueda insensible a mayúsculas, acentos y ordenamiento (COLLATE Latin1_General_CI_AI).
 	 * - Filtra sedes cuyo nombre contenga el término proporcionado.
+	 * - Incluye la relación con el distrito (`district`) en cada sede encontrada.
 	 * - Ordena los resultados primero por sedes activas (descendente) y luego por nombre (ascendente).
 	 * - Transforma el resultado en un array de BranchResponseDto para exponer solo los campos necesarios.
 	 *
 	 * @param {string} searchTerm - Texto para buscar dentro del nombre completo de la sede.
 	 *
-	 * @returns {Promise<BranchResponseDto[]>} Array con los sedes encontradas transformados en DTOs.
+	 * @returns {Promise<BranchResponseDto[]>} Array con las sedes encontradas transformadas en DTOs, incluyendo su distrito.
 	 *
 	 * @async
 	 */
 	public async searchByName(searchTerm: string): Promise<BranchResponseDto[]> {
 		const branchFound = await this.branchRepository
 			.createQueryBuilder("branch")
+			.leftJoinAndSelect("branch.district", "district")
 			.where(`branch.name COLLATE Latin1_General_CI_AI LIKE :searchTerm`, {
 				searchTerm: `%${searchTerm}%`,
 			})
@@ -134,6 +144,7 @@ export class BranchesService {
 	 */
 	public async findOneById(id: string): Promise<BranchResponseDto> {
 		const branchFound = await this.branchRepository.findOne({
+			relations: ["district"],
 			where: {
 				id,
 			},
@@ -179,6 +190,7 @@ export class BranchesService {
 	 *
 	 * Descripción detallada:
 	 * - Realiza una consulta para encontrar una sucursal cuyo nombre coincida exactamente.
+	 * - Incluye la relación con el distrito (`district`) en cada sede.
 	 * - Retorna la entidad BranchResponseDto si se encuentra, o undefined si no existe.
 	 *
 	 * @param {string} name - Nombre de la sucursal a buscar.
@@ -189,6 +201,7 @@ export class BranchesService {
 	 */
 	private async findOneByName(name: string): Promise<BranchResponseDto> {
 		return this.branchRepository.findOne({
+			relations: ["district"],
 			where: {
 				name,
 			},
@@ -202,12 +215,14 @@ export class BranchesService {
 	 * - Busca la sucursal por ID; si no existe, lanza NotFoundException.
 	 * - Si se proporciona un nuevo nombre distinto al actual, verifica que no esté en uso por otra sucursal; si está en uso, lanza ConflictException.
 	 * - Actualiza los demás campos de la sucursal con los datos proporcionados.
-	 * - Guarda y retorna la sucursal actualizada transformada a BranchResponseDto.
+	 * - Guarda la sucursal actualizada.
+	 * - Vuelve a consultar la sucursal incluyendo la relación con el distrito.
+	 * - Retorna la sucursal actualizada transformada a BranchResponseDto.
 	 *
 	 * @param {string} id - ID de la sucursal a actualizar.
 	 * @param {UpdateBranchDto} updateBranchDto - DTO con los datos para actualizar la sucursal.
 	 *
-	 * @returns {Promise<BranchResponseDto>} DTO con los datos de la sucursal actualizada.
+	 * @returns {Promise<BranchResponseDto>} DTO con los datos de la sucursal actualizada, incluyendo su distrito.
 	 *
 	 * @throws {NotFoundException} Cuando no se encuentra la sucursal por ID.
 	 * @throws {ConflictException} Cuando el nuevo nombre ya está en uso por otra sucursal.
@@ -244,8 +259,14 @@ export class BranchesService {
 		// Actualización de campos
 		Object.assign(branchFound, rest);
 
-		const updateBranch = await this.branchRepository.save(branchFound);
+		await this.branchRepository.save(branchFound);
 
-		return transformResponseSingle(BranchResponseDto, updateBranch);
+		// Buscar la sede y agregar la relación
+		const updatedWithRelations = await this.branchRepository.findOne({
+			relations: ["district"],
+			where: { id },
+		});
+
+		return transformResponseSingle(BranchResponseDto, updatedWithRelations);
 	}
 }
