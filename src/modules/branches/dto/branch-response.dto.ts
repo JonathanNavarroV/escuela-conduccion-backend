@@ -47,6 +47,18 @@ export class BranchResponseDto {
 
 	@ApiProperty({
 		description: "Comuna donde se ubica la sede.",
+		example: {
+			id: "D38DAC55-4FCB-4D33-84E0-20A43D70DC6E",
+			name: "Santiago",
+			province: {
+				id: "90C73D90-02D7-4E85-A3F0-4DB78BC42DFC",
+				name: "Santiago",
+				region: {
+					id: "8040D5D2-2985-45FF-AC4F-764AE4A50648",
+					name: "Metropolitana de Santiago",
+				},
+			},
+		},
 	})
 	@Type(() => DistrictResponseDto)
 	@Expose()

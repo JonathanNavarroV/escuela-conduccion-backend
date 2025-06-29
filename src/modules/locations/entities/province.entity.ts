@@ -28,7 +28,7 @@ export class Province {
 
 	@ManyToOne(() => Region, (region) => region.provinces, { nullable: true })
 	@JoinColumn({ name: "regionId" })
-	public region: Region;
+	public region: Region | null;
 
 	@Column({ type: "uniqueidentifier", nullable: true })
 	public regionId: string;
