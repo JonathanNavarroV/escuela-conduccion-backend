@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Expose } from "class-transformer";
+import { Expose, Type } from "class-transformer";
+import { DistrictResponseDto } from "src/modules/locations/dto/district-response.dto";
 
 export class BranchResponseDto {
 	@ApiProperty({
@@ -45,11 +46,23 @@ export class BranchResponseDto {
 	public address: string;
 
 	@ApiProperty({
-		description: "ID de la comuna donde se ubica la sede.",
-		example: "F420267D-CD89-40E2-896F-5520E09D3F4B",
+		description: "Comuna donde se ubica la sede.",
+		example: {
+			id: "D38DAC55-4FCB-4D33-84E0-20A43D70DC6E",
+			name: "Santiago",
+			province: {
+				id: "90C73D90-02D7-4E85-A3F0-4DB78BC42DFC",
+				name: "Santiago",
+				region: {
+					id: "8040D5D2-2985-45FF-AC4F-764AE4A50648",
+					name: "Metropolitana de Santiago",
+				},
+			},
+		},
 	})
+	@Type(() => DistrictResponseDto)
 	@Expose()
-	public districtId: string;
+	public district: DistrictResponseDto;
 
 	@ApiProperty({
 		description: "Indica si la sede está activa o no.",
