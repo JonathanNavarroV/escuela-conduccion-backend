@@ -144,7 +144,7 @@ export class BranchesService {
 	 */
 	public async findOneById(id: string): Promise<BranchResponseDto> {
 		const branchFound = await this.branchRepository.findOne({
-			relations: ["district"],
+			relations: ["district", "district.province", "district.province.region"],
 			where: {
 				id,
 			},
