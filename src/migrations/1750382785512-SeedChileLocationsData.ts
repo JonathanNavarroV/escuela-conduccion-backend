@@ -1,3 +1,4 @@
+import { escapeSingleQuotes } from "src/utils/strings/escape.util";
 import { MigrationInterface, QueryRunner } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
 
@@ -1791,10 +1792,10 @@ export class SeedChileLocationsData1750382785512 implements MigrationInterface {
             INSERT INTO countries (id, name) VALUES ('${countryId}', 'Chile')
         `);
 
+		// Insertar regiones
 		for (const region of chileData.regions) {
 			const regionId = uuidv4();
 
-			// Insertar regiones
 			await queryRunner.query(
 				`INSERT INTO regions (id, name, countryId) VALUES ('${regionId}', '${escapeSingleQuotes(region.name)}', '${countryId}')`,
 			);
@@ -1825,8 +1826,4 @@ export class SeedChileLocationsData1750382785512 implements MigrationInterface {
 		await queryRunner.query(`DELETE FROM regions`);
 		await queryRunner.query(`DELETE FROM countries`);
 	}
-}
-
-function escapeSingleQuotes(text: string): string {
-	return text.replace(/'/g, "''");
 }
