@@ -2259,6 +2259,13 @@ export class SeedArgentinaLocationData1751152830729
             INSERT INTO countries (id, name) VALUES ('${countryId}', 'Argentina')
             `);
 
+		// Insertar niveles
+		await queryRunner.query(`
+            INSERT INTO location_levels (id, [key], label_key, countryId) VALUES ('${uuidv4()}', 'province', 'location.argentina.province', '${countryId}')`);
+
+		await queryRunner.query(`
+            INSERT INTO location_levels (id, [key], label_key, countryId) VALUES ('${uuidv4()}', 'district', 'location.argentina.district', '${countryId}')`);
+
 		// Insertar provincias
 		for (const province of argentinaData.country.adm1) {
 			const provinceId = uuidv4();
@@ -2279,8 +2286,36 @@ export class SeedArgentinaLocationData1751152830729
 	}
 
 	public async down(queryRunner: QueryRunner): Promise<void> {
-		await queryRunner.query(`DELETE FROM districts`);
-		await queryRunner.query(`DELETE FROM provinces`);
-		await queryRunner.query(`DELETE FROM countries`);
+		// Obtener el ID del país Argentina
+		const argentina = await queryRunner.query(`
+		SELECT id FROM countries WHERE name = 'Argentina'
+	`);
+		const argentinaId = argentina?.[0]?.id;
+
+		// Eliminar niveles
+		await queryRunner.query(
+			`DELETE FROM location_levels WHERE countryId = '${argentinaId}'`,
+		);
+
+		// Si no existe, no hacer nada
+		if (!argentinaId) return;
+
+		// Eliminar primero los districts (comunas/partidos)
+		await queryRunner.query(`
+		DELETE FROM districts
+		WHERE provinceId IN (
+			SELECT id FROM provinces WHERE countryId = '${argentinaId}'
+		)
+	`);
+
+		// Luego las provincias
+		await queryRunner.query(`
+		DELETE FROM provinces WHERE countryId = '${argentinaId}'
+	`);
+
+		// Finalmente el país
+		await queryRunner.query(`
+		DELETE FROM countries WHERE id = '${argentinaId}'
+	`);
 	}
 }
